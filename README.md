@@ -2,7 +2,7 @@ updated: 2018-05-26
 
 ofxTLVMMNotes is an addon for ofxTimeline to add a note track to drive my application [VMM](https://github.com/lg3bass/VMM). This is very much in progress. 
 
-![ofxVMMTLNotes Track](./ofxTLVMMNotes.png =600x)
+![ofxVMMTLNotes Track](ofxTLVMMNotes.png =600x)
 
 This addon is a derivitive/customization of the ofxTLNote addon by Leo Zimmerman.  This code appears in his branch of [ofxTimeline](https://github.com/leozimmerman/ofxTimeline/commit/10847277b4535697b1e6ac2084669f13c90f51fe) for his application Sonoscopio.
 
