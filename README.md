@@ -1,5 +1,7 @@
 updated: 2018-05-26
 
+#ofxTLVMMNotes
+
 ofxTLVMMNotes is an addon for ofxTimeline to add a note track to drive my application [VMM](https://github.com/lg3bass/VMM). This is very much in progress. 
 
 <img src="https://raw.githubusercontent.com/lg3bass/ofxTLVMMNotes/master/ofxTLVMMNotes.png" width="600"/>
@@ -8,7 +10,7 @@ This addon is a derivitive/customization of the ofxTLNote addon by Leo Zimmerman
 
 To use it with ofxTimeline basically you have to first - setup your project to use [ofxTimeline](https://github/lg3bass/ofxTimeline")
 
-####Use the Project Generator to add ofxTLVMMNotes
+###Use the Project Generator to add ofxTLVMMNotes
 
 In your ofApp.h file add (usually next to #include "ofxTimeline.h"):
 
@@ -27,7 +29,7 @@ And the in your ofApp.cpp file you can add buttons track with something like thi
 See the ""example-basic"" project in the addon folder. Right click on each note to see a menu with note durations.
 
 
-####TODO:
+###TODO:
 - Make note durations dependent on tempo.
 - Scale durations with zoomer.
 - use easing curves for note start and ends.
