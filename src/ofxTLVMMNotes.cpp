@@ -210,8 +210,8 @@ void ofxTLVMMNotes::drawBackgroundGrid() {
   
     ofPushStyle();
 
-    int white = 50;
-    int black = 20;
+    int white = 200;
+    int black = 200;
     
     for (int i = 0; i <= gridRows.size(); i++) {
         
@@ -644,19 +644,22 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, float length, bool highlight){
     float w = 100 * length;
     
     
+    
     //head of the note
     //ofDrawCircle(pos.x-p, pos.y, p);
     
     //body
-    ofDrawRectangle(pos-p, w, d);
+    //ofDrawRectangle(pos-p, w, d);
+    ofDrawRectangle(pos.x,pos.y-p, w, d);
     
-    
+    /*
     //draw triangle
     ofBeginShape();
     ofVertex(pos.x+w-p, pos.y+p);
     ofVertex(pos.x+25+w, pos.y);
     ofVertex(pos.x+w-p, pos.y-p);
     ofEndShape();
+    */
     //-----------------------
 }
 

@@ -1,19 +1,19 @@
 <keyframes>
     <key>
         <pitch>68</pitch>
-        <value>0.340541720</value>
+        <value>0.360709012</value>
         <duration>2000</duration>
         <length>2.000000000</length>
         <time>00:00:00:500</time>
-        <value>0.340541720</value>
+        <value>0.360709012</value>
     </key>
     <key>
-        <pitch>76</pitch>
-        <value>0.785714328</value>
+        <pitch>74</pitch>
+        <value>0.690476239</value>
         <duration>1000</duration>
         <length>1.000000000</length>
-        <time>00:00:01:492</time>
-        <value>0.785714328</value>
+        <time>00:00:01:625</time>
+        <value>0.690476239</value>
     </key>
     <key>
         <pitch>69</pitch>
@@ -41,10 +41,10 @@
     </key>
     <key>
         <pitch>72</pitch>
-        <value>0.595238209</value>
+        <value>0.595238149</value>
         <duration>62</duration>
         <length>0.062500000</length>
         <time>00:00:05:500</time>
-        <value>0.595238209</value>
+        <value>0.595238149</value>
     </key>
 </keyframes>
