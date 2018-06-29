@@ -28,14 +28,14 @@ void ofApp::setup(){
     //curves track for comparison
     timeline.addCurves("My Curves Track", "myCurvesTrack.xml",ofRange(-10.0,10.0),0.0);
 
-    timeline.getTicker()->bpmUnit;
+    //timeline.getTicker()->bpmUnit;
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
 
     curtime = timeline.getCurrentTime();
-    cout << timeline.getTicker()->bpmUnit << endl;
+    //cout << timeline.getTicker()->bpmUnit << endl;
 }
 
 //--------------------------------------------------------------
