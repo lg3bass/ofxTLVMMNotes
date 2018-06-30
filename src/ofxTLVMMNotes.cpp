@@ -122,6 +122,9 @@ void ofxTLVMMNotes::draw(){
   
     ofPushStyle();
     
+    //calculate 1 measure note length
+    
+    
     ofFill();
     for(int i = 0; i < keyframes.size(); i++){
         //make sure it's on screen
@@ -635,32 +638,45 @@ void ofxTLVMMNotes::regionSelected(ofLongRange timeRange, ofRange valueRange){
 
 void ofxTLVMMNotes::drawNote(ofVec2f pos, float length, bool highlight){
     
+    double oneMeasure = 4.0/(timeline->getBPM()/60.);
+    double measureLength = screenXForTime(oneMeasure) - screenXForTime(0);
+    //cout << screenXForTime(oneMeasure) - screenXForTime(0) << endl;
+    
+    
     int d = 10;
     if(highlight){
         d = 14;
     }
     
     int p = d/2;
-    float w = 100 * length;
+    float w = measureLength*length;
     
     
     
-    //head of the note
-    //ofDrawCircle(pos.x-p, pos.y, p);
+    //draw attack ramp
+    ofBeginShape();
+        ofVertex(pos.x-(measureLength*0.125), pos.y);
+        ofVertex(pos.x-1, pos.y+p);
+        ofVertex(pos.x-1, pos.y-p);
+    ofEndShape();
     
-    //body
+    //draw decay
+    
+    //draw sustain
     //ofDrawRectangle(pos-p, w, d);
     ofDrawRectangle(pos.x,pos.y-p, w, d);
     
-    /*
+    
     //draw triangle
     ofBeginShape();
-    ofVertex(pos.x+w-p, pos.y+p);
-    ofVertex(pos.x+25+w, pos.y);
-    ofVertex(pos.x+w-p, pos.y-p);
+        ofVertex(pos.x+w+1, pos.y+p);
+        ofVertex(pos.x+(measureLength*0.125)+w, pos.y);
+        ofVertex(pos.x+w+1, pos.y-p);
     ofEndShape();
-    */
+    
     //-----------------------
+    
+
 }
 
 

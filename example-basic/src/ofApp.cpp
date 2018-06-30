@@ -17,7 +17,7 @@ void ofApp::setup(){
     
     //when i switch to frames it bangs twice.
     //timeline.setFrameBased(true);
-    timeline.setDurationInFrames(240);
+    timeline.setDurationInFrames(60);
     timeline.setOffset(ofVec2f(50,0));
     timeline.setWidth(900);
     
@@ -26,9 +26,11 @@ void ofApp::setup(){
     timeline.addTrack("My TL Notes Track", notesTrack);
     
     //curves track for comparison
-    timeline.addCurves("My Curves Track", "myCurvesTrack.xml",ofRange(-10.0,10.0),0.0);
+    //timeline.addCurves("My Curves Track", "myCurvesTrack.xml",ofRange(-10.0,10.0),0.0);
 
     //timeline.getTicker()->bpmUnit;
+    
+    
 }
 
 //--------------------------------------------------------------
