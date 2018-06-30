@@ -95,7 +95,7 @@ void ofxTLVMMNotes::update(){
             
             //ofLogNotice() << "fired bang with accuracy of " << (keyframes[i]->time - thisTimelinePoint) << endl;
             //ofLogNotice() << "fired bang with accuracy of thitTimeLinePoint(" << (thisTimelinePoint) << ")" << endl;
-            ofLogNotice() << "fired bang with accuracy of keyframes[i]->time (" << keyframes[i]->time << "|" << thisTimelinePoint << ")" << endl;
+            ofLogNotice() << "fired bang with accuracy of keyframes[i]->time (" << keyframes[i]->time << "|" << thisTimelinePoint << ")";
             
             bangFired(keyframes[i]);
             lastBangTime = ofGetElapsedTimef();
