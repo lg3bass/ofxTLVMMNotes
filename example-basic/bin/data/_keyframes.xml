@@ -1,26 +1,34 @@
 <keyframes>
     <key>
-        <pitch>62</pitch>
-        <value>0.119047619</value>
-        <duration>62</duration>
-        <length>0.062500000</length>
-        <time>00:00:00:250</time>
-        <value>0.119047619</value>
+        <pitch>73</pitch>
+        <value>0.642857194</value>
+        <duration>500</duration>
+        <length>0.500000000</length>
+        <time>00:00:00:125</time>
+        <value>0.642857194</value>
     </key>
     <key>
-        <pitch>64</pitch>
-        <value>0.214285716</value>
-        <duration>125</duration>
-        <length>0.125000000</length>
-        <time>00:00:00:500</time>
-        <value>0.214285716</value>
+        <pitch>75</pitch>
+        <value>0.738095284</value>
+        <duration>250</duration>
+        <length>0.250000000</length>
+        <time>00:00:00:375</time>
+        <value>0.738095284</value>
     </key>
     <key>
         <pitch>71</pitch>
-        <value>0.590756357</value>
-        <duration>250</duration>
-        <length>0.250000000</length>
-        <time>00:00:01:000</time>
-        <value>0.590756357</value>
+        <value>0.547619104</value>
+        <duration>125</duration>
+        <length>0.125000000</length>
+        <time>00:00:00:500</time>
+        <value>0.547619104</value>
+    </key>
+    <key>
+        <pitch>69</pitch>
+        <value>0.452380955</value>
+        <duration>62</duration>
+        <length>0.062500000</length>
+        <time>00:00:00:625</time>
+        <value>0.452380955</value>
     </key>
 </keyframes>

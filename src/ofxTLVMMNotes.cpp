@@ -14,6 +14,13 @@
 ofxTLVMMNote::ofxTLVMMNote(int p){
     pitch = p;
     duration = 0;
+    //default values for testing purposes
+    attackDuration = 0.25;
+    decayDuration = 0.25;
+    sustainDuration = 0.0;
+    releaseDuration = 0.5;
+    
+    ADSR = ofVec4f(0.0625, 0.0625, 0.5, 0.125);
 }
 
 string ofxTLVMMNote::getPitchDisplay() {
@@ -82,27 +89,10 @@ ofxTLVMMNotes::~ofxTLVMMNotes(){
 }
 
 void ofxTLVMMNotes::update(){
-    //	if(isPlaying || timeline->getIsPlaying()){
-    long thisTimelinePoint = currentTrackTime();
-    for(int i = 0; i < keyframes.size(); i++){
-        if(timeline->getInOutRangeMillis().contains(keyframes[i]->time) &&
-           lastTimelinePoint <= keyframes[i]->time &&
-           thisTimelinePoint >= keyframes[i]->time &&
-           thisTimelinePoint != lastTimelinePoint)
-        {
-            //is there a keyframes[i]->frame
-            
-            
-            //ofLogNotice() << "fired bang with accuracy of " << (keyframes[i]->time - thisTimelinePoint) << endl;
-            //ofLogNotice() << "fired bang with accuracy of thitTimeLinePoint(" << (thisTimelinePoint) << ")" << endl;
-            ofLogNotice() << "fired bang with accuracy of keyframes[i]->time (" << keyframes[i]->time << "|" << thisTimelinePoint << ")";
-            
-            bangFired(keyframes[i]);
-            lastBangTime = ofGetElapsedTimef();
-        }
-    }
-    lastTimelinePoint = thisTimelinePoint;
-    //	}
+    
+    //this needs to be done from update otherwise we get double triggers
+    sendNoteOnEvent();
+
 
 }
 
@@ -122,9 +112,6 @@ void ofxTLVMMNotes::draw(){
   
     ofPushStyle();
     
-    //calculate 1 measure note length
-    
-    
     ofFill();
     for(int i = 0; i < keyframes.size(); i++){
         //make sure it's on screen
@@ -137,47 +124,25 @@ void ofxTLVMMNotes::draw(){
             
             if(hoverKeyframe == note){
                 //hovering over a note.
-
                 ofSetColor(timeline->getColors().highlightColor, 100);
-                //ofDrawCircle(screenPoint, 5);
-                //ofDrawRectangle(screenPoint-7, 14, 14);
-                
                 drawNote(screenPoint, note->length, true);
                 
+                //draw note name
                 ofSetColor(timeline->getColors().textColor);
                 timeline->getFont().drawString(note->getPitchDisplay(), screenPoint.x, screenPoint.y - 5);
             }
             else if(isKeyframeSelected(note)){
+
                 ofSetColor(timeline->getColors().textColor);
-                //ofDrawCircle(screenPoint, 5);
-                //ofDrawRectangle(screenPoint-7, 14, 14);
-                
                 drawNote(screenPoint, note->length, true);
                 
+                //draw note name
                 ofSetColor(timeline->getColors().textColor);
                 timeline->getFont().drawString(note->getPitchDisplay(), screenPoint.x, screenPoint.y - 5);
             } else {
             
-                //TODO: move this to a function so you can extend the size of thenotes.
                 ofSetColor(timeline->getColors().keyColor);
                 drawNote(screenPoint,note->length, false);
-                
-                /*
-                ofDrawCircle(screenPoint.x-5, screenPoint.y, 5);
-                
-                ofDrawRectangle(screenPoint-5, 10, 10);
-                
-                ofBeginShape();
-                ofVertex(screenPoint.x+5, screenPoint.y+5);
-                ofVertex(screenPoint.x+25, screenPoint.y);
-                ofVertex(screenPoint.x+5, screenPoint.y-5);
-                ofEndShape();
-                */
-                
-                
-                //-----------------------
-                
-                
                 
             }
             
@@ -193,19 +158,23 @@ void ofxTLVMMNotes::draw(){
     
    
     
-    //int textHeight = bounds.y + 10;
-    display = ofRectangle(bounds.x , bounds.y , 50, 20);
+        //Text field on the top left showing the note range.
+        display = ofRectangle(bounds.x , bounds.y , 50, 20);
     
-    textField.bounds.x = display.x;
-    textField.bounds.y = display.y;
+        textField.bounds.x = display.x;
+        textField.bounds.y = display.y;
     
-    ofSetColor(0);
-    ofDrawRectangle(display);
+        ofSetColor(0);
+        ofDrawRectangle(display);
     
-    ofSetColor(255);
-    textField.draw();
+        ofSetColor(255);
+        textField.draw();
     
     ofPopStyle();
+    
+  
+
+    
     
 }
 
@@ -572,6 +541,8 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
             ofxTLVMMNote* note = (ofxTLVMMNote*)selectedKeyframes[k];
             quantizeNoteByPos(note);
         }
+        
+        
     }
 }
 
@@ -640,45 +611,91 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, float length, bool highlight){
     
     double oneMeasure = 4.0/(timeline->getBPM()/60.);
     double measureLength = screenXForTime(oneMeasure) - screenXForTime(0);
-    //cout << screenXForTime(oneMeasure) - screenXForTime(0) << endl;
-    
-    
-    int d = 10;
+ 
+
+    int h = 10;
     if(highlight){
-        d = 14;
+        h = 14;
     }
     
-    int p = d/2;
-    float w = measureLength*length;
+    int p = h/2;
     
+    float a = measureLength*0.0625;
+    float d = measureLength*0.0625;
+    float s = measureLength*length;
+    float r = measureLength*0.125;
+    
+    ofPushStyle();
+        if(highlight){
+            ofSetColor(255,255,255);
+            ofDrawCircle(pos.x, pos.y, 4);
+        } else {
+            ofSetColor(255,255,255);
+            ofNoFill();
+            ofDrawCircle(pos.x, pos.y, 10);
+        }
+    ofPopStyle();
     
     
     //draw attack ramp
-    ofBeginShape();
-        ofVertex(pos.x-(measureLength*0.125), pos.y);
-        ofVertex(pos.x-1, pos.y+p);
-        ofVertex(pos.x-1, pos.y-p);
-    ofEndShape();
+    ofPushStyle();
+    ofSetColor(255, 0, 0); 
+        ofBeginShape();
+            ofVertex(pos.x, pos.y);
+            ofVertex(pos.x+a-1, pos.y+p+2);
+            ofVertex(pos.x+a-1, pos.y-p-2);
+        ofEndShape();
+    ofPopStyle();
     
     //draw decay
+    ofPushStyle();
+        ofSetColor(0, 255, 0);
+        ofBeginShape();
+            ofVertex(pos.x+a, pos.y+p+2);
+            ofVertex(pos.x+a+d, pos.y+p);
+            ofVertex(pos.x+a+d, pos.y-p);
+            ofVertex(pos.x+a, pos.y-p-2);
+        ofEndShape();
+    ofPopStyle();
     
     //draw sustain
-    //ofDrawRectangle(pos-p, w, d);
-    ofDrawRectangle(pos.x,pos.y-p, w, d);
-    
+    ofPushStyle();
+        ofSetColor(0, 0, 255);
+        ofDrawRectangle(pos.x+a+d,pos.y-p, s, h);
+    ofPopStyle();
     
     //draw triangle
-    ofBeginShape();
-        ofVertex(pos.x+w+1, pos.y+p);
-        ofVertex(pos.x+(measureLength*0.125)+w, pos.y);
-        ofVertex(pos.x+w+1, pos.y-p);
-    ofEndShape();
+    ofPushStyle();
+        ofSetColor(0, 255, 255);
+        ofBeginShape();
+            ofVertex(pos.x+a+d+s+1, pos.y+p);
+            ofVertex(pos.x+a+d+s+r, pos.y);
+            ofVertex(pos.x+a+d+s+1, pos.y-p);
+        ofEndShape();
+    ofPopStyle();
     
-    //-----------------------
     
 
 }
 
+
+void ofxTLVMMNotes::sendNoteOnEvent(){
+    //    if(isPlaying || timeline->getIsPlaying()){
+    long thisTimelinePoint = currentTrackTime();
+    for(int i = 0; i < keyframes.size(); i++){
+        if(timeline->getInOutRangeMillis().contains(keyframes[i]->time) &&
+           lastTimelinePoint <= keyframes[i]->time &&
+           thisTimelinePoint >= keyframes[i]->time &&
+           thisTimelinePoint != lastTimelinePoint)
+        {
+            ofLogNotice() << "fired bang with accuracy of keyframes[i]->time (" << keyframes[i]->time << "|" << thisTimelinePoint << ")";
+            bangFired(keyframes[i]);
+            lastBangTime = ofGetElapsedTimef();
+        }
+    }
+    lastTimelinePoint = thisTimelinePoint;
+    //    }
+}
 
 void ofxTLVMMNotes::initializeNotes(){
     

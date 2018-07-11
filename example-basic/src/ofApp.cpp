@@ -37,14 +37,19 @@ void ofApp::setup(){
 void ofApp::update(){
 
     curtime = timeline.getCurrentTime();
+    
     //cout << timeline.getTicker()->bpmUnit << endl;
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    ofSetWindowTitle(ofToString(curtime));
+    string title = ofToString(curtime) + " : " + ofToString(timeline.getCurrentTimeMillis());
+    
+    ofSetWindowTitle(title);
     timeline.draw();
+    
+    ofDrawBitmapString("TEST", 10, 40);
 }
 
 //--------------------------------------------------------------

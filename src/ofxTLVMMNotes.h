@@ -49,12 +49,29 @@ typedef struct {
 
 
 class ofxTLVMMNote : public ofxTLKeyframe {
+
+//  ofxTLKeyframe inherited variables.
+//    ofVec2f screenPosition; // cached screen position
+//    unsigned long long previousTime; //for preventing overlap conflicts
+//    unsigned long long time; //in millis
+//    float value; //normalized
+
 public:
     ofxTLVMMNote(int p);
     int pitch;
     int duration;
     float length;
     string getPitchDisplay();
+    
+    //ADSR
+    unsigned long long attackDuration;
+    unsigned long long decayDuration;
+    unsigned long long sustainDuration;
+    unsigned long long releaseDuration;
+    
+    ofVec4f ADSR;
+    
+    
 
 };
 
@@ -123,6 +140,7 @@ protected:
     
     void drawNote(ofVec2f pos, float length, bool highlight);
     
+    void sendNoteOnEvent();
     
     //note modal window
     void initializeNotes();
@@ -149,4 +167,6 @@ protected:
     
     //you can responde to a keyframe about to be killed with this function right before the parent class deletes it
     virtual void willDeleteKeyframe(ofxTLKeyframe* keyframe);
+    
+    //
 };
