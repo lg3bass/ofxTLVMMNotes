@@ -138,9 +138,12 @@ protected:
     void quantizeNoteByPitch(ofxTLVMMNote* note);
     float rowNormHeight;
     
-    void drawNote(ofVec2f pos, float length, bool highlight);
+    //void drawNote(ofVec2f pos, float length, bool highlight);
+    void drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight);
+
     
     void sendNoteOnEvent();
+    void animateADSR(int keyindex);
     
     //note modal window
     void initializeNotes();

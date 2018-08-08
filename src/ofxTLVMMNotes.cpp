@@ -15,12 +15,12 @@ ofxTLVMMNote::ofxTLVMMNote(int p){
     pitch = p;
     duration = 0;
     //default values for testing purposes
-    attackDuration = 0.25;
-    decayDuration = 0.25;
-    sustainDuration = 0.0;
-    releaseDuration = 0.5;
+    attackDuration = 0.0625;
+    decayDuration = 0.0625;
+    sustainDuration = 0.125;
+    releaseDuration = 0.125;
     
-    ADSR = ofVec4f(0.0625, 0.0625, 0.5, 0.125);
+    ADSR = ofVec4f(0.0625, 0.0625, 0.125, 0.125);
 }
 
 string ofxTLVMMNote::getPitchDisplay() {
@@ -125,7 +125,7 @@ void ofxTLVMMNotes::draw(){
             if(hoverKeyframe == note){
                 //hovering over a note.
                 ofSetColor(timeline->getColors().highlightColor, 100);
-                drawNote(screenPoint, note->length, true);
+                drawNote(screenPoint, note, true);
                 
                 //draw note name
                 ofSetColor(timeline->getColors().textColor);
@@ -134,7 +134,7 @@ void ofxTLVMMNotes::draw(){
             else if(isKeyframeSelected(note)){
 
                 ofSetColor(timeline->getColors().textColor);
-                drawNote(screenPoint, note->length, true);
+                drawNote(screenPoint, note, true);
                 
                 //draw note name
                 ofSetColor(timeline->getColors().textColor);
@@ -142,7 +142,7 @@ void ofxTLVMMNotes::draw(){
             } else {
             
                 ofSetColor(timeline->getColors().keyColor);
-                drawNote(screenPoint,note->length, false);
+                drawNote(screenPoint,note, false);
                 
             }
             
@@ -316,8 +316,6 @@ int ofxTLVMMNotes::getNoteAtPercent(float percent){
 
 void ofxTLVMMNotes::bangFired(ofxTLKeyframe* key){
 
-
-    
     ofxTLBangEventArgs args;
     args.sender = timeline;
     args.track = this;
@@ -334,7 +332,8 @@ void ofxTLVMMNotes::bangFired(ofxTLKeyframe* key){
             "[frame " << ofToString(timeline->getCurrentFrame()) << "]," <<
             "[duration " << ofToString(note->duration) << "]" << endl;
     
-    
+    //Notify event up to
+    ///addons/ofxTimeline/src/ofxTLEvents.h:109:	ofEvent<ofxTLBangEventArgs> bangFired;
     ofNotifyEvent(events().bangFired, args);
 }
 
@@ -516,6 +515,10 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
                     ofxTLVMMNote* note = (ofxTLVMMNote*)selectedKeyframes[k];
                     note->duration = noteDurations[i]->duration;
                     note->length = noteDurations[i]->length;
+                    note->ADSR[0] = 0.0625;
+                    note->ADSR[1] = 0.0625;
+                    note->ADSR[2] = noteDurations[i]->length;
+                    note->ADSR[3] = 0.125;
                     
                     cout << "note: " << note->pitch << ":" << note->duration << ":" << note->length << endl;
                     
@@ -607,7 +610,7 @@ void ofxTLVMMNotes::regionSelected(ofLongRange timeRange, ofRange valueRange){
 
 
 
-void ofxTLVMMNotes::drawNote(ofVec2f pos, float length, bool highlight){
+void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
     
     double oneMeasure = 4.0/(timeline->getBPM()/60.);
     double measureLength = screenXForTime(oneMeasure) - screenXForTime(0);
@@ -620,10 +623,10 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, float length, bool highlight){
     
     int p = h/2;
     
-    float a = measureLength*0.0625;
-    float d = measureLength*0.0625;
-    float s = measureLength*length;
-    float r = measureLength*0.125;
+    float a = measureLength*note->ADSR[0];
+    float d = measureLength*note->ADSR[1];
+    float s = measureLength*note->ADSR[2];
+    float r = measureLength*note->ADSR[3];
     
     ofPushStyle();
         if(highlight){
@@ -688,13 +691,34 @@ void ofxTLVMMNotes::sendNoteOnEvent(){
            thisTimelinePoint >= keyframes[i]->time &&
            thisTimelinePoint != lastTimelinePoint)
         {
-            ofLogNotice() << "fired bang with accuracy of keyframes[i]->time (" << keyframes[i]->time << "|" << thisTimelinePoint << ")";
+            //ofLogNotice()   << "Accuracy of keyframes[" << i << "]->time(miliseconds) [" << keyframes[i]->time << "|" << thisTimelinePoint << "]";
+            
+            
+            //FIRE BANG
             bangFired(keyframes[i]);
             lastBangTime = ofGetElapsedTimef();
+            
+            //animateASDR
+            animateADSR(i);
+            
+            
+            
+            
         }
+        
+        
+        
     }
     lastTimelinePoint = thisTimelinePoint;
     //    }
+}
+
+void ofxTLVMMNotes::animateADSR(int keyindex){
+    ofLogNotice()   << "Accuracy of keyframes[" << keyindex << "]->time(miliseconds) ["
+    << keyframes[keyindex]->time << "|" << currentTrackTime() << "]";
+    
+    
+
 }
 
 void ofxTLVMMNotes::initializeNotes(){
@@ -765,6 +789,11 @@ void ofxTLVMMNotes::restoreKeyframe(ofxTLKeyframe* key, ofxXmlSettings& xmlStore
     note->value = xmlStore.getValue("value", 0.5);
     note->duration = xmlStore.getValue("duration", 0);
     note->length = xmlStore.getValue("length", 0.0);
+    note->ADSR[0] = xmlStore.getValue("attack", 0.0);
+    note->ADSR[1] = xmlStore.getValue("decay", 0.0);
+    note->ADSR[2] = xmlStore.getValue("sustain", 0.0);
+    note->ADSR[3] = xmlStore.getValue("release", 0.0);
+    
 
 }
 
@@ -774,6 +803,10 @@ void ofxTLVMMNotes::storeKeyframe(ofxTLKeyframe* key, ofxXmlSettings& xmlStore){
     xmlStore.addValue("value", note->value);
     xmlStore.addValue("duration", note->duration);
     xmlStore.addValue("length", note->length);
+    xmlStore.addValue("attack", note->ADSR[0]);
+    xmlStore.addValue("decay", note->ADSR[1]);
+    xmlStore.addValue("sustain", note->ADSR[2]);
+    xmlStore.addValue("release", note->ADSR[3]);
     
 }
 

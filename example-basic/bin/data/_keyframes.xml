@@ -1,34 +1,50 @@
 <keyframes>
     <key>
-        <pitch>73</pitch>
-        <value>0.642857194</value>
+        <pitch>68</pitch>
+        <value>0.404761910</value>
         <duration>500</duration>
         <length>0.500000000</length>
-        <time>00:00:00:125</time>
-        <value>0.642857194</value>
+        <attack>0.062500000</attack>
+        <decay>0.062500000</decay>
+        <sustain>0.500000000</sustain>
+        <release>0.125000000</release>
+        <time>00:00:00:015</time>
+        <value>0.404761910</value>
     </key>
     <key>
-        <pitch>75</pitch>
-        <value>0.738095284</value>
+        <pitch>72</pitch>
+        <value>0.595238149</value>
         <duration>250</duration>
         <length>0.250000000</length>
-        <time>00:00:00:375</time>
-        <value>0.738095284</value>
+        <attack>0.062500000</attack>
+        <decay>0.062500000</decay>
+        <sustain>0.250000000</sustain>
+        <release>0.125000000</release>
+        <time>00:00:00:125</time>
+        <value>0.595238149</value>
     </key>
     <key>
-        <pitch>71</pitch>
-        <value>0.547619104</value>
+        <pitch>78</pitch>
+        <value>0.843915403</value>
         <duration>125</duration>
         <length>0.125000000</length>
-        <time>00:00:00:500</time>
-        <value>0.547619104</value>
+        <attack>0.062500000</attack>
+        <decay>0.062500000</decay>
+        <sustain>0.125000000</sustain>
+        <release>0.125000000</release>
+        <time>00:00:00:375</time>
+        <value>0.843915403</value>
     </key>
     <key>
-        <pitch>69</pitch>
-        <value>0.452380955</value>
+        <pitch>65</pitch>
+        <value>0.261904776</value>
         <duration>62</duration>
         <length>0.062500000</length>
-        <time>00:00:00:625</time>
-        <value>0.452380955</value>
+        <attack>0.062500000</attack>
+        <decay>0.062500000</decay>
+        <sustain>0.062500000</sustain>
+        <release>0.125000000</release>
+        <time>00:00:01:125</time>
+        <value>0.261904776</value>
     </key>
 </keyframes>
