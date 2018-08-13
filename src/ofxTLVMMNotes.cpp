@@ -92,7 +92,19 @@ void ofxTLVMMNotes::update(){
     
     //this needs to be done from update otherwise we get double triggers
     sendNoteOnEvent();
+    
+    //get the current track time
 
+    
+//    for(int i = 0; i < keyframes.size(); i++){
+//        if(isKeyframeIsInBounds(keyframes[i])){
+//            ofxTLVMMNote* note = (ofxTLVMMNote*)keyframes[i];
+//
+//        }
+//    }
+    
+
+    
 
 }
 
@@ -152,9 +164,21 @@ void ofxTLVMMNotes::draw(){
             ofSetColor(ofColor::red);
             ofDrawCircle(screenPoint, 1);
 
-        }
+            
+            //draw my note info
+            long thisTimelinePoint = currentTrackTime();
+            
+            if(thisTimelinePoint >= keyframes[i]->time && thisTimelinePoint <= (keyframes[i]->time + 1000)){
+                //cout << "note" << note[i].getPitchDisplay() << endl;
+                ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x, screenPoint.y + 20);
+            } else {
+                
+            }
+            
+            
+        }// end if
         
-    }
+    }// end for
     
    
     
@@ -717,7 +741,23 @@ void ofxTLVMMNotes::animateADSR(int keyindex){
     ofLogNotice()   << "Accuracy of keyframes[" << keyindex << "]->time(miliseconds) ["
     << keyframes[keyindex]->time << "|" << currentTrackTime() << "]";
     
+    //convert keyframe to note
+    ofxTLVMMNote* note = (ofxTLVMMNote*)keyframes[keyindex];
     
+    //how long is one measure
+    double oneMeasure = 4.0/(timeline->getBPM()/60.);
+    
+
+     
+    //calculate the total duration of the note
+    long totalDuration = note->duration + 250;
+    
+    //get the current track time
+    long thisTimelinePoint = currentTrackTime();
+    
+    if(thisTimelinePoint >= keyframes[keyindex]->time && thisTimelinePoint <= (keyframes[keyindex]->time + totalDuration)){
+        cout << "in note" << endl;
+    }
 
 }
 
