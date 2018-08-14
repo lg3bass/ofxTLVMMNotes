@@ -37,6 +37,7 @@
 #include "ofMain.h"
 #include "ofxTLKeyframes.h"
 #include "ofxTextInputField.h"
+#include "ofxTween.h"
 
 typedef struct {
     int id;
@@ -71,7 +72,7 @@ public:
     
     ofVec4f ADSR;
     
-    
+    bool notePlaying;
 
 };
 
@@ -126,6 +127,14 @@ public:
     virtual void drawModalContent();
     
     
+    //ofxTween test
+    ofxEasingLinear easeLinear;
+    
+    float clamp;
+    ofxTween::ofxEasingType easingType;
+    string easestring;
+    
+    float outFrame = 0;
     
 protected:
     

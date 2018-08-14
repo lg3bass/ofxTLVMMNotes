@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofBackground(255*.15);
-    ofSetFrameRate(30);
+    ofSetFrameRate(60);
     ofSetVerticalSync(true);
     
     ofEnableSmoothing();

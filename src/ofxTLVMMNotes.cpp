@@ -21,6 +21,7 @@ ofxTLVMMNote::ofxTLVMMNote(int p){
     releaseDuration = 0.125;
     
     ADSR = ofVec4f(0.0625, 0.0625, 0.125, 0.125);
+    notePlaying = false;
 }
 
 string ofxTLVMMNote::getPitchDisplay() {
@@ -82,6 +83,14 @@ ofxTLVMMNotes::ofxTLVMMNotes(){
     
     setRange(ofRange(60,72));
     drawingEasingWindow = false;
+    
+    //ofxTween test
+    clamp = false;
+    easingType = ofxTween::easeInOut;
+    easestring = "ease in/out";
+    
+    
+    
 }
 
 ofxTLVMMNotes::~ofxTLVMMNotes(){
@@ -158,8 +167,6 @@ void ofxTLVMMNotes::draw(){
                 
             }
             
-            
-            
             //draw red dot where the key is
             ofSetColor(ofColor::red);
             ofDrawCircle(screenPoint, 1);
@@ -168,19 +175,33 @@ void ofxTLVMMNotes::draw(){
             //draw my note info
             long thisTimelinePoint = currentTrackTime();
             
-            if(thisTimelinePoint >= keyframes[i]->time && thisTimelinePoint <= (keyframes[i]->time + 1000)){
-                //cout << "note" << note[i].getPitchDisplay() << endl;
+            float t = keyframes[i]->time;
+            
+            float a = 62.5;
+            float d = 62.5;
+            float s = note->duration;
+            float r = 125;
+            
+            float n = (a + d + s + r) * 2;
+            
+            if(thisTimelinePoint >= t && thisTimelinePoint <= t + n){
+                note->notePlaying = true;
                 ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x, screenPoint.y + 20);
-            } else {
+
+                //TEST: ofMap test.
                 
+                outFrame = ofxTween::map(thisTimelinePoint, t, t+n, 0, 100, clamp, easeLinear, easingType);
+                
+                cout << "outFrame: " << outFrame << endl;
+                
+            } else {
+                note->notePlaying = false;
             }
             
             
         }// end if
         
     }// end for
-    
-   
     
         //Text field on the top left showing the note range.
         display = ofRectangle(bounds.x , bounds.y , 50, 20);
@@ -196,7 +217,7 @@ void ofxTLVMMNotes::draw(){
     
     ofPopStyle();
     
-  
+    
 
     
     
@@ -700,8 +721,6 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
             ofVertex(pos.x+a+d+s+1, pos.y-p);
         ofEndShape();
     ofPopStyle();
-    
-    
 
 }
 
@@ -717,7 +736,6 @@ void ofxTLVMMNotes::sendNoteOnEvent(){
         {
             //ofLogNotice()   << "Accuracy of keyframes[" << i << "]->time(miliseconds) [" << keyframes[i]->time << "|" << thisTimelinePoint << "]";
             
-            
             //FIRE BANG
             bangFired(keyframes[i]);
             lastBangTime = ofGetElapsedTimef();
@@ -725,12 +743,7 @@ void ofxTLVMMNotes::sendNoteOnEvent(){
             //animateASDR
             animateADSR(i);
             
-            
-            
-            
         }
-        
-        
         
     }
     lastTimelinePoint = thisTimelinePoint;
@@ -747,8 +760,6 @@ void ofxTLVMMNotes::animateADSR(int keyindex){
     //how long is one measure
     double oneMeasure = 4.0/(timeline->getBPM()/60.);
     
-
-     
     //calculate the total duration of the note
     long totalDuration = note->duration + 250;
     
@@ -833,8 +844,8 @@ void ofxTLVMMNotes::restoreKeyframe(ofxTLKeyframe* key, ofxXmlSettings& xmlStore
     note->ADSR[1] = xmlStore.getValue("decay", 0.0);
     note->ADSR[2] = xmlStore.getValue("sustain", 0.0);
     note->ADSR[3] = xmlStore.getValue("release", 0.0);
+    note->notePlaying = false;
     
-
 }
 
 void ofxTLVMMNotes::storeKeyframe(ofxTLKeyframe* key, ofxXmlSettings& xmlStore){
@@ -860,24 +871,17 @@ void ofxTLVMMNotes::selectedKeySecondaryClick(ofMouseEventArgs& args){
     durationWindowPosition = ofVec2f(MIN(args.x, bounds.width - durationBoxWidth*2),
                                      MIN(args.y, timeline->getBottomLeft().y - durationBoxHeight));
     
-    
-    
-    
     drawingEasingWindow = true;
     timeline->presentedModalContent(this);
     
     cout << "ofxTLVMMNotes::drawModalContent()";
     
-    
-
     //you can make a popup window start here
     //    timeline->presentedModalContent(this);
     //and then when you want to get rid of it call somewhere else
     //    timeline->dismissedModalContent();
     //this will lock all other timeline interaction and feed all things into your track
     //so feel free to draw out of bounds, but don't go off the screen or out of the timeline
-    
-    
 }
 
 
