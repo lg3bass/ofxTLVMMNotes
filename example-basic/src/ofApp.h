@@ -4,6 +4,7 @@
 #include "ofxTimeline.h"
 #include "ofxTLVMMNotes.h"
 
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -30,5 +31,7 @@ class ofApp : public ofBaseApp{
     
     ofxTLVMMNotes* notesTrack;
     ofxTLCurves* curvesTrack;
+    
+
 		
 };

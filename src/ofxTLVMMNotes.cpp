@@ -89,7 +89,8 @@ ofxTLVMMNotes::ofxTLVMMNotes(){
     easingType = ofxTween::easeInOut;
     easestring = "ease in/out";
     
-    
+    //osc test
+    sender.setup("localhost", 7005);
     
 }
 
@@ -177,22 +178,59 @@ void ofxTLVMMNotes::draw(){
             
             float t = keyframes[i]->time;
             
-            float a = 62.5;
-            float d = 62.5;
-            float s = note->duration;
-            float r = 125;
+            float a = 62.5*2;
+            float d = 62.5*2;
+            float s = note->duration*2;
+            float r = 125*2;
             
             float n = (a + d + s + r) * 2;
             
+            //attack
+            if(thisTimelinePoint >= t && thisTimelinePoint <= t+a){
+                ofSetColor(ofColor::red);
+                ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x, screenPoint.y + 20);
+                intFrame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
+                cout << "outFrame(a): " << intFrame << endl;
+                
+            }
+
+            //decay
+            if(thisTimelinePoint >= t+a && thisTimelinePoint <= t+a+d) {
+                ofSetColor(ofColor::green);
+                ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x+50, screenPoint.y + 20);
+                intFrame = ofxTween::map(thisTimelinePoint, t+a, t+a+d, 11, 15, clamp, easeLinear, easingType);
+                cout << "outFrame(d): " << intFrame << endl;
+            }
+
+            //sustain
+            if(thisTimelinePoint >= t+a+d && thisTimelinePoint <= t+a+d+s) {
+                ofSetColor(ofColor::blue);
+                ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x+100, screenPoint.y + 20);
+                intFrame = 16;
+                cout << "outFrame(s): " << intFrame << endl;
+            }
+            
+            //release
+            if(thisTimelinePoint >= t+a+d+s && thisTimelinePoint <= t+a+d+s+r) {
+                ofSetColor(ofColor::lightBlue);
+                ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x+150, screenPoint.y + 20);
+                intFrame = ofxTween::map(thisTimelinePoint, t+a+d+s, t+a+d+s+r, 17, 30, clamp, easeLinear, easingType);
+                cout << "outFrame(r): " << intFrame << endl;
+            }
+            
+            //send my osc out port 7005
+            sendOSC(intFrame);
+            
+            //ORIGINAL TEST
             if(thisTimelinePoint >= t && thisTimelinePoint <= t + n){
                 note->notePlaying = true;
-                ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x, screenPoint.y + 20);
+                //ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x, screenPoint.y + 20);
 
                 //TEST: ofMap test.
                 
-                outFrame = ofxTween::map(thisTimelinePoint, t, t+n, 0, 100, clamp, easeLinear, easingType);
-                
-                cout << "outFrame: " << outFrame << endl;
+                //outFrame = ofxTween::map(thisTimelinePoint, t, t+n, 0, 30, clamp, easeLinear, easingType);
+                //intFrame = ofxTween::map(thisTimelinePoint, t, t+n, 0, 30, clamp, easeLinear, easingType);
+                //cout << "outFrame: " << intFrame << endl;
                 
             } else {
                 note->notePlaying = false;
@@ -216,10 +254,6 @@ void ofxTLVMMNotes::draw(){
         textField.draw();
     
     ofPopStyle();
-    
-    
-
-    
     
 }
 
@@ -349,6 +383,14 @@ void ofxTLVMMNotes::drawModalContent(){
     
 }
 
+void ofxTLVMMNotes::sendOSC(int val){
+    
+    ofxOscMessage m;
+    m.setAddress("/stillframe");
+    m.addIntArg(1);
+    m.addIntArg(val);
+    sender.sendMessage(m, false);
+}
 
 int ofxTLVMMNotes::getNote() {
     return getNoteAtMillis(currentTrackTime());
@@ -724,7 +766,6 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
 
 }
 
-
 void ofxTLVMMNotes::sendNoteOnEvent(){
     //    if(isPlaying || timeline->getIsPlaying()){
     long thisTimelinePoint = currentTrackTime();
@@ -742,12 +783,11 @@ void ofxTLVMMNotes::sendNoteOnEvent(){
             
             //animateASDR
             animateADSR(i);
-            
         }
-        
     }
     lastTimelinePoint = thisTimelinePoint;
     //    }
+    
 }
 
 void ofxTLVMMNotes::animateADSR(int keyindex){

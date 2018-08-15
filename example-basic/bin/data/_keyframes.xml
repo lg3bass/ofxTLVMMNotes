@@ -2,11 +2,11 @@
     <key>
         <pitch>72</pitch>
         <value>0.595238149</value>
-        <duration>250</duration>
-        <length>0.250000000</length>
+        <duration>125</duration>
+        <length>0.125000000</length>
         <attack>0.062500000</attack>
         <decay>0.062500000</decay>
-        <sustain>0.250000000</sustain>
+        <sustain>0.125000000</sustain>
         <release>0.125000000</release>
         <time>00:00:00:250</time>
         <value>0.595238149</value>

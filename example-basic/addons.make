@@ -1,5 +1,6 @@
 ofxAudioDecoder
 ofxMSATimer
+ofxOsc
 ofxRange
 ofxTLVMMNotes
 ofxTextInputField

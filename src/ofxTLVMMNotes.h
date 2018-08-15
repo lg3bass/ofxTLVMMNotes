@@ -39,6 +39,9 @@
 #include "ofxTextInputField.h"
 #include "ofxTween.h"
 
+//for testing
+#include "ofxOsc.h"
+
 typedef struct {
     int id;
     ofRectangle bounds;
@@ -135,6 +138,11 @@ public:
     string easestring;
     
     float outFrame = 0;
+    int intFrame = 0;
+    
+    //osc
+    ofxOscSender sender;
+    void sendOSC(int val);
     
 protected:
     
