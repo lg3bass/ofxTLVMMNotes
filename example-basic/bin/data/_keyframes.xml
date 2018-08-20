@@ -2,49 +2,25 @@
     <key>
         <pitch>65</pitch>
         <value>0.261904716</value>
-        <duration>1000</duration>
-        <length>4.000000000</length>
+        <duration>0</duration>
+        <length>0.000000000</length>
         <attack>0.500000000</attack>
         <decay>0.500000000</decay>
-        <sustain>4.000000000</sustain>
+        <sustain>2.000000000</sustain>
         <release>1.000000000</release>
-        <time>00:00:00:250</time>
+        <time>00:00:00:000</time>
         <value>0.261904716</value>
     </key>
     <key>
-        <pitch>77</pitch>
-        <value>0.833333373</value>
-        <duration>250</duration>
-        <length>1.000000000</length>
-        <attack>0.500000000</attack>
-        <decay>0.000000000</decay>
-        <sustain>1.000000000</sustain>
-        <release>1.000000000</release>
-        <time>00:00:03:750</time>
-        <value>0.833333373</value>
-    </key>
-    <key>
         <pitch>72</pitch>
-        <value>0.595238149</value>
-        <duration>62</duration>
-        <length>0.250000000</length>
+        <value>0.591871142</value>
+        <duration>0</duration>
+        <length>0.000000000</length>
         <attack>0.500000000</attack>
         <decay>0.500000000</decay>
-        <sustain>0.250000000</sustain>
+        <sustain>2.000000000</sustain>
         <release>1.000000000</release>
-        <time>00:00:05:250</time>
-        <value>0.595238149</value>
-    </key>
-    <key>
-        <pitch>69</pitch>
-        <value>0.449013948</value>
-        <duration>62</duration>
-        <length>0.250000000</length>
-        <attack>0.500000000</attack>
-        <decay>0.000000000</decay>
-        <sustain>0.250000000</sustain>
-        <release>1.000000000</release>
-        <time>00:00:06:750</time>
-        <value>0.449013948</value>
+        <time>00:00:04:000</time>
+        <value>0.591871142</value>
     </key>
 </keyframes>

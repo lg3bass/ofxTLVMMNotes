@@ -21,8 +21,8 @@ ofxTLVMMNote::ofxTLVMMNote(int p){
     releaseDuration = 0.125;
     
     //1.0 == quarter note
-    ADSR = ofVec4f(0.5, 0.5, 2.0, 1.0);
-    //ADSR = ofVec4f(0.0625, 0.0625, 0.125, 0.125);
+    ADSR = ofVec4f(0.5, 0.5, 2.0, 1.0); //default values
+    //ADSR = ofVec4f(0.0625, 0.0625, 0.125, 0.125); //TBD - testing
     notePlaying = false;
 }
 
@@ -164,16 +164,16 @@ void ofxTLVMMNotes::draw(){
             
             //draw my note info
             long thisTimelinePoint = currentTrackTime();
-            
             float t = keyframes[i]->time;
-            float oneBeatInMS = 500.0;
+            float oneBeatInMS = getNoteDuration(timeline->getBPM(), 1.0, false);
             
+            //calculate how long each ADSR component is.
             float a = (note->ADSR[0]*oneBeatInMS);
             float d = (note->ADSR[1]*oneBeatInMS);
             float s = (note->ADSR[2]*oneBeatInMS);
             float r = (note->ADSR[3]*oneBeatInMS);
             
-            
+            //ADSR components
             //attack
             if(thisTimelinePoint >= t && thisTimelinePoint <= t+a){
                 ofSetColor(ofColor::red);
@@ -358,22 +358,39 @@ void ofxTLVMMNotes::drawModalContent(){
 }
 
 void ofxTLVMMNotes::sendOSC(int val){
-    
     ofxOscMessage m;
     m.setAddress("/stillFrame");
     m.addIntArg(1);
     m.addIntArg(val);
     sender.sendMessage(m, false);
+    
 }
 
 int ofxTLVMMNotes::getNote() {
     return getNoteAtMillis(currentTrackTime());
+    
 }
 
 int ofxTLVMMNotes::getNoteAtPercent(float percent){
     unsigned long long millis = percent*timeline->getDurationInMilliseconds();
     return getNoteAtMillis(millis);
+    
 }
+
+float ofxTLVMMNotes::getNoteDuration(float BPM, float value, bool normalized = false){
+    float duration;
+    
+    if(normalized) {
+        duration = (value/(BPM/60.0));
+    } else {
+        duration = (value/(BPM/60.0))*1000;
+    }
+    
+    return duration;
+    
+}
+
+
 
 void ofxTLVMMNotes::bangFired(ofxTLKeyframe* key){
 
@@ -515,7 +532,7 @@ void ofxTLVMMNotes::didEnterText(){
 
 bool enteringText = false;
 
-
+#pragma mark mouse interactions
 
 bool ofxTLVMMNotes::mousePressed(ofMouseEventArgs& args, long millis){
     
@@ -573,8 +590,9 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
                     //cout << "duration: " << noteDurations[i]->name << ":" << noteDurations[i]->duration << endl;
                     
                     ofxTLVMMNote* note = (ofxTLVMMNote*)selectedKeyframes[k];
-                    note->duration = noteDurations[i]->duration;
-                    note->length = noteDurations[i]->length;
+                    
+                    note->duration = noteDurations[i]->duration;//TODO: do I need ->duration anymore?
+                    note->length = noteDurations[i]->length;//TODO: do I need length
                     note->ADSR[0] = 0.5;
                     note->ADSR[1] = 0.0;
                     note->ADSR[2] = noteDurations[i]->length;
@@ -609,8 +627,9 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
     }
 }
 
+#pragma mark note functions
+
 void ofxTLVMMNotes::quantizeNoteByPos(ofxTLVMMNote* note){
-    
     for (int i = 0; i <= gridRows.size(); i++) {
         float diff = abs(note->value - gridRows[i].yPos);
         if ( diff <= (rowNormHeight * 0.5) ) {
@@ -619,15 +638,18 @@ void ofxTLVMMNotes::quantizeNoteByPos(ofxTLVMMNote* note){
             return;
         }
     }
+
 }
+
 void ofxTLVMMNotes::quantizeAllNotesByPitch(){
     for(int k = 0; k < keyframes.size(); k++) {
         ofxTLVMMNote* note = (ofxTLVMMNote*)keyframes[k];
         quantizeNoteByPitch(note);
     }
+
 }
-void ofxTLVMMNotes::quantizeNoteByPitch(ofxTLVMMNote* note){
-    
+
+void ofxTLVMMNotes::quantizeNoteByPitch(ofxTLVMMNote* note){    
     if (note->pitch < valueRange.min) {note->pitch = valueRange.min;}
     else if (note->pitch > valueRange.max) {note->pitch = valueRange.max;}
     
@@ -638,9 +660,9 @@ void ofxTLVMMNotes::quantizeNoteByPitch(ofxTLVMMNote* note){
         }
     }
     
-    
-    
 }
+
+
 
 //keys pressed events, and nuding from arrow keys with normalized nudge amount 0 - 1.0
 void ofxTLVMMNotes::keyPressed(ofKeyEventArgs& args){
@@ -672,13 +694,9 @@ void ofxTLVMMNotes::regionSelected(ofLongRange timeRange, ofRange valueRange){
 
 void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
     
-    double oneBeat = 1.0/(timeline->getBPM()/60.0);//60 is fps
+    //double oneBeat = 1.0/(timeline->getBPM()/60.0);
+    double oneBeat = getNoteDuration(timeline->getBPM(), 1.0, true);//60 is fps
     double beatLengthOnTimeline = screenXForTime(oneBeat) - screenXForTime(0);
-    
-    
-    double oneMeasure = 4.0/(timeline->getBPM()/60.0);
-    double measureLength = screenXForTime(oneMeasure) - screenXForTime(0);
- 
 
     int h = 10;
     if(highlight){
@@ -744,7 +762,6 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
 }
 
 void ofxTLVMMNotes::sendNoteOnEvent(){
-    //    if(isPlaying || timeline->getIsPlaying()){
     long thisTimelinePoint = currentTrackTime();
     for(int i = 0; i < keyframes.size(); i++){
         if(timeline->getInOutRangeMillis().contains(keyframes[i]->time) &&
@@ -763,11 +780,10 @@ void ofxTLVMMNotes::sendNoteOnEvent(){
         }
     }
     lastTimelinePoint = thisTimelinePoint;
-    //    }
-    
+
 }
 
-void ofxTLVMMNotes::animateADSR(int keyindex){
+void ofxTLVMMNotes::animateADSR(int keyindex){//TODO: not sure this is used anymore.
     ofLogNotice()   << "Accuracy of keyframes[" << keyindex << "]->time(miliseconds) ["
     << keyframes[keyindex]->time << "|" << currentTrackTime() << "]";
     

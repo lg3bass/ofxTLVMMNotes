@@ -103,9 +103,11 @@ public:
     void setOctavesNum(int oct);
     void didEnterText();
     
+    #pragma mark note functions
     int getNote();
     int getNoteAtMillis(long millis);
     int getNoteAtPercent(float percent);
+    float getNoteDuration(float BPM, float value, bool normalized);
     
     //events
     long lastTimelinePoint;
