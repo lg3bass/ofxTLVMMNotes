@@ -17,9 +17,9 @@ void ofApp::setup(){
     
     //when i switch to frames it bangs twice.
     //timeline.setFrameBased(true);
-    timeline.setDurationInFrames(60);
+    timeline.setDurationInFrames(240);
     timeline.setOffset(ofVec2f(50,0));
-    timeline.setWidth(900);
+    timeline.setWidth(1000);
     
     notesTrack = new ofxTLVMMNotes();
     notesTrack->setRange(ofRange(60,80));

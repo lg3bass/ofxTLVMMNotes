@@ -20,7 +20,9 @@ ofxTLVMMNote::ofxTLVMMNote(int p){
     sustainDuration = 0.125;
     releaseDuration = 0.125;
     
-    ADSR = ofVec4f(0.0625, 0.0625, 0.125, 0.125);
+    //1.0 == quarter note
+    ADSR = ofVec4f(0.5, 0.5, 2.0, 1.0);
+    //ADSR = ofVec4f(0.0625, 0.0625, 0.125, 0.125);
     notePlaying = false;
 }
 
@@ -102,19 +104,6 @@ void ofxTLVMMNotes::update(){
     
     //this needs to be done from update otherwise we get double triggers
     sendNoteOnEvent();
-    
-    //get the current track time
-
-    
-//    for(int i = 0; i < keyframes.size(); i++){
-//        if(isKeyframeIsInBounds(keyframes[i])){
-//            ofxTLVMMNote* note = (ofxTLVMMNote*)keyframes[i];
-//
-//        }
-//    }
-    
-
-    
 
 }
 
@@ -177,13 +166,13 @@ void ofxTLVMMNotes::draw(){
             long thisTimelinePoint = currentTrackTime();
             
             float t = keyframes[i]->time;
+            float oneBeatInMS = 500.0;
             
-            float a = 62.5*2;
-            float d = 62.5*2;
-            float s = note->duration*2;
-            float r = 125*2;
+            float a = (note->ADSR[0]*oneBeatInMS);
+            float d = (note->ADSR[1]*oneBeatInMS);
+            float s = (note->ADSR[2]*oneBeatInMS);
+            float r = (note->ADSR[3]*oneBeatInMS);
             
-            float n = (a + d + s + r) * 2;
             
             //attack
             if(thisTimelinePoint >= t && thisTimelinePoint <= t+a){
@@ -191,7 +180,6 @@ void ofxTLVMMNotes::draw(){
                 ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x, screenPoint.y + 20);
                 intFrame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
                 cout << "outFrame(a): " << intFrame << endl;
-                
             }
 
             //decay
@@ -221,20 +209,6 @@ void ofxTLVMMNotes::draw(){
             //send my osc out port 7005
             sendOSC(intFrame);
             
-            //ORIGINAL TEST
-            if(thisTimelinePoint >= t && thisTimelinePoint <= t + n){
-                note->notePlaying = true;
-                //ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x, screenPoint.y + 20);
-
-                //TEST: ofMap test.
-                
-                //outFrame = ofxTween::map(thisTimelinePoint, t, t+n, 0, 30, clamp, easeLinear, easingType);
-                //intFrame = ofxTween::map(thisTimelinePoint, t, t+n, 0, 30, clamp, easeLinear, easingType);
-                //cout << "outFrame: " << intFrame << endl;
-                
-            } else {
-                note->notePlaying = false;
-            }
             
             
         }// end if
@@ -386,7 +360,7 @@ void ofxTLVMMNotes::drawModalContent(){
 void ofxTLVMMNotes::sendOSC(int val){
     
     ofxOscMessage m;
-    m.setAddress("/stillframe");
+    m.setAddress("/stillFrame");
     m.addIntArg(1);
     m.addIntArg(val);
     sender.sendMessage(m, false);
@@ -424,7 +398,7 @@ void ofxTLVMMNotes::bangFired(ofxTLKeyframe* key){
     ofNotifyEvent(events().bangFired, args);
 }
 
-///TODO: Testear esta función
+
 int ofxTLVMMNotes::getNoteAtMillis(long millis){
     
     if(keyframes.size() == 0){
@@ -592,7 +566,6 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
         timeline->dismissedModalContent();
         ofVec2f screenpoint(args.x,args.y);
         
-        
         for(int i = 0; i < noteDurations.size(); i++){
             if(noteDurations[i]->bounds.inside(screenpoint-durationWindowPosition)){
                 for(int k = 0; k < selectedKeyframes.size(); k++){
@@ -602,13 +575,12 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
                     ofxTLVMMNote* note = (ofxTLVMMNote*)selectedKeyframes[k];
                     note->duration = noteDurations[i]->duration;
                     note->length = noteDurations[i]->length;
-                    note->ADSR[0] = 0.0625;
-                    note->ADSR[1] = 0.0625;
+                    note->ADSR[0] = 0.5;
+                    note->ADSR[1] = 0.0;
                     note->ADSR[2] = noteDurations[i]->length;
-                    note->ADSR[3] = 0.125;
+                    note->ADSR[3] = 1.0;
                     
                     cout << "note: " << note->pitch << ":" << note->duration << ":" << note->length << endl;
-                    
                     
                 }
                 timeline->flagTrackModified(this);
@@ -629,6 +601,7 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
         //snap the notes on the grid.
         for(int k = 0; k < selectedKeyframes.size(); k++) {
             ofxTLVMMNote* note = (ofxTLVMMNote*)selectedKeyframes[k];
+            cout << "ofxTLVMMNotes::mouseReleased - CREATE NOTE" << endl;
             quantizeNoteByPos(note);
         }
         
@@ -699,7 +672,11 @@ void ofxTLVMMNotes::regionSelected(ofLongRange timeRange, ofRange valueRange){
 
 void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
     
-    double oneMeasure = 4.0/(timeline->getBPM()/60.);
+    double oneBeat = 1.0/(timeline->getBPM()/60.0);//60 is fps
+    double beatLengthOnTimeline = screenXForTime(oneBeat) - screenXForTime(0);
+    
+    
+    double oneMeasure = 4.0/(timeline->getBPM()/60.0);
     double measureLength = screenXForTime(oneMeasure) - screenXForTime(0);
  
 
@@ -710,10 +687,10 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
     
     int p = h/2;
     
-    float a = measureLength*note->ADSR[0];
-    float d = measureLength*note->ADSR[1];
-    float s = measureLength*note->ADSR[2];
-    float r = measureLength*note->ADSR[3];
+    float a = beatLengthOnTimeline*note->ADSR[0];
+    float d = beatLengthOnTimeline*note->ADSR[1];
+    float s = beatLengthOnTimeline*note->ADSR[2];
+    float r = beatLengthOnTimeline*note->ADSR[3];
     
     ofPushStyle();
         if(highlight){
@@ -819,37 +796,37 @@ void ofxTLVMMNotes::initializeNotes(){
     nd = new noteDuration();
     nd->name = "1/16";
     nd->duration = 62;
-    nd->length = 0.0625;
+    nd->length = 0.25;
     noteDurations.push_back(nd);
     
     nd = new noteDuration();
     nd->name = "1/8";
     nd->duration = 125;
-    nd->length = 0.125;
+    nd->length = 0.5;
     noteDurations.push_back(nd);
     
     nd = new noteDuration();
     nd->name = "1/4";
     nd->duration = 250;
-    nd->length = 0.250;
+    nd->length = 1.0;
     noteDurations.push_back(nd);
     
     nd = new noteDuration();
     nd->name = "1/2";
     nd->duration = 500;
-    nd->length = 0.5;
+    nd->length = 2.0;
     noteDurations.push_back(nd);
     
     nd = new noteDuration();
     nd->name = "1";
     nd->duration = 1000;
-    nd->length = 1.0;
+    nd->length = 4.0;
     noteDurations.push_back(nd);
     
     nd = new noteDuration();
     nd->name = "2";
     nd->duration = 2000;
-    nd->length = 2.0;
+    nd->length = 8.0;
     noteDurations.push_back(nd);
     
     durationBoxWidth  = 50;
