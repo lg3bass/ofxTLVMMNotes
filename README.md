@@ -1,4 +1,4 @@
-updated: 2018-06-22
+updated: 2018-09-219 - WIP
 
 #ofxTLVMMNotes
 
@@ -6,7 +6,10 @@ ofxTLVMMNotes is an addon for ofxTimeline to add a piano roll style note track t
 
 A key feature of the ofxTLVMMNotes track is to create a visual representation of the concept of a 'anticipation' in animation.  Generally speaking, action is quantized to hit on a beat but sometimes the action begins and builds(anticipation) up the 'hit'.  We want the visual representation of the notes on the grid accurately match the 'hit' action to align to musical note information yet also display the anticipation. This is done using triangles before and after the notes.
 
-<img src="https://raw.githubusercontent.com/lg3bass/ofxTLVMMNotes/master/ofxTLVMMNotes.png" width="600"/>
+##ADSR
+The different colors represent (A)ttack - red, (D)ecay - green, (S)ustain - blue, and (R)elease - aqua.  You will be able to set each component of the keyframe to a note value (1/16,1/8,1/4,1/2,etc) by selecting with a contextual menu.
+
+<img src="https://raw.githubusercontent.com/lg3bass/ofxTLVMMNotes/master/ofxTLVMMNotes_20180819.png" width="600"/>
 
 ###Credits
 This addon is a derivitive/customization of the ofxTLNote addon by Leo Zimmerman.  This code appears in his branch of [ofxTimeline](https://github.com/leozimmerman/ofxTimeline/commit/10847277b4535697b1e6ac2084669f13c90f51fe) for his application Sonoscopio.
@@ -33,20 +36,22 @@ And the in your ofApp.cpp file you can add buttons track with something like thi
  
     
 
-###TODO (20180622):
+###TODO (20180819):
+- Function Make note durations dependent on tempo. 
+	- Create function to convert note->duration to size.
+	- Scale durations with zoomer.
+- Segments
+	- Create additional contextual menu to select segment.
+- Slices are determined by note value (1-12)
 - Better representation of bars and beats
 	- solid bar lines
 	- alternating bg color for bars
 - Hover over note display 
 	- function to display notes.
 	- buffer, note, duration, slice
-- Create additional contextual menu to select slice.
-- Create additional contextual menu to select segment.
-- Make note durations dependent on tempo. 
-	- Create function to convert note->duration to size.
-	- Scale durations with zoomer.
 - Visual representation of notes events debugging.
-- Anticipation shift. 
+- Anticipation shift.
+	- select each segment of the note and have that snap to beat. 
 	- offset the note display start time. 
 	- snap where action hits
 - Ease-in, ease-out
@@ -56,12 +61,13 @@ And the in your ofApp.cpp file you can add buttons track with something like thi
 	- use of easing curves for note start and ends.
 - Multisegment notes to indicate which sections of a object sequence to play.
 - change the Yaxis number of notes (buffers)
+- Wrap around notes when looping
+- Create 2 modes (scrub and trigger)
 
 
 
 ###Notes(pun intended) and Issues:
 
 - Notes will double trigger if the timeline units are set to frames.
-- Notes do not scale. (yet)
-- list
+
 
