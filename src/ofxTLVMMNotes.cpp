@@ -24,6 +24,8 @@ ofxTLVMMNote::ofxTLVMMNote(int p){
     ADSR = ofVec4f(0.5, 0.5, 2.0, 1.0); //default values
     //ADSR = ofVec4f(0.0625, 0.0625, 0.125, 0.125); //TBD - testing
     notePlaying = false;
+    
+    frame = 0;
 }
 
 string ofxTLVMMNote::getPitchDisplay() {
@@ -178,37 +180,42 @@ void ofxTLVMMNotes::draw(){
             if(thisTimelinePoint >= t && thisTimelinePoint <= t+a){
                 ofSetColor(ofColor::red);
                 ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x, screenPoint.y + 20);
-                intFrame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
-                cout << "outFrame(a): " << intFrame << endl;
+                //intFrame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
+                note->frame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
+                cout << "outFrame(a): " << i << " - " << note->frame << endl;
             }
 
             //decay
             if(thisTimelinePoint >= t+a && thisTimelinePoint <= t+a+d) {
                 ofSetColor(ofColor::green);
                 ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x+50, screenPoint.y + 20);
-                intFrame = ofxTween::map(thisTimelinePoint, t+a, t+a+d, 11, 15, clamp, easeLinear, easingType);
-                cout << "outFrame(d): " << intFrame << endl;
+                //intFrame = ofxTween::map(thisTimelinePoint, t+a, t+a+d, 11, 15, clamp, easeLinear, easingType);
+                note->frame = ofxTween::map(thisTimelinePoint, t+a, t+a+d, 11, 15, clamp, easeLinear, easingType);
+                cout << "outFrame(d): " << i << " - " << note->frame << endl;
             }
 
             //sustain
             if(thisTimelinePoint >= t+a+d && thisTimelinePoint <= t+a+d+s) {
                 ofSetColor(ofColor::blue);
                 ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x+100, screenPoint.y + 20);
-                intFrame = 16;
-                cout << "outFrame(s): " << intFrame << endl;
+                //intFrame = 16;
+                note->frame = 16;
+                cout << "outFrame(s): " << i << " - " << note->frame << endl;
             }
             
             //release
             if(thisTimelinePoint >= t+a+d+s && thisTimelinePoint <= t+a+d+s+r) {
                 ofSetColor(ofColor::lightBlue);
                 ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x+150, screenPoint.y + 20);
-                intFrame = ofxTween::map(thisTimelinePoint, t+a+d+s, t+a+d+s+r, 17, 30, clamp, easeLinear, easingType);
-                cout << "outFrame(r): " << intFrame << endl;
+                //intFrame = ofxTween::map(thisTimelinePoint, t+a+d+s, t+a+d+s+r, 17, 30, clamp, easeLinear, easingType);
+                note->frame = ofxTween::map(thisTimelinePoint, t+a+d+s, t+a+d+s+r, 17, 30, clamp, easeLinear, easingType);
+
+                cout << "outFrame(r): " << i << " - " << note->frame << endl;
             }
             
             //send my osc out port 7005
-            sendOSC(intFrame);
-            
+            //sendOSC(intFrame);
+            sendOSC(i, note->frame);
             
             
         }// end if
@@ -357,10 +364,11 @@ void ofxTLVMMNotes::drawModalContent(){
     
 }
 
-void ofxTLVMMNotes::sendOSC(int val){
+void ofxTLVMMNotes::sendOSC(int buffer, int val){
     ofxOscMessage m;
     m.setAddress("/stillFrame");
     m.addIntArg(1);
+    m.addIntArg(buffer);
     m.addIntArg(val);
     sender.sendMessage(m, false);
     

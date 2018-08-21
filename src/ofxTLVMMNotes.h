@@ -76,6 +76,8 @@ public:
     ofVec4f ADSR;
     
     bool notePlaying;
+    
+    int frame;
 
 };
 
@@ -144,7 +146,7 @@ public:
     
     //osc
     ofxOscSender sender;
-    void sendOSC(int val);
+    void sendOSC(int buffer, int val);
     
 protected:
     

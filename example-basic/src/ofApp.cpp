@@ -16,13 +16,15 @@ void ofApp::setup(){
     timeline.setShowBPMGrid(true);
     
     //when i switch to frames it bangs twice.
-    //timeline.setFrameBased(true);
-    timeline.setDurationInFrames(480);//8 measures @ 120bpm
+    timeline.setFrameRate(60);
+    timeline.setFrameBased(true);
+    timeline.setDurationInFrames(480);//4 measures @ 120bpm
     timeline.setOffset(ofVec2f(50,0));
     timeline.setWidth(1000);
     
+    
     notesTrack = new ofxTLVMMNotes();
-    notesTrack->setRange(ofRange(60,80));
+    notesTrack->setRange(ofRange(60,72));
     timeline.addTrack("My TL Notes Track", notesTrack);
     
     //curves track for comparison
@@ -47,7 +49,7 @@ void ofApp::draw(){
     string title = ofToString(curtime) + " : " + ofToString(timeline.getCurrentTimeMillis());
     
     ofSetWindowTitle(title);
-    timeline.draw();
+    timeline.draw(false,false);
     
     ofDrawBitmapString("TEST", 10, 40);
 }
