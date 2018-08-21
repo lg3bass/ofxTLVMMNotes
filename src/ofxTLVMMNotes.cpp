@@ -183,6 +183,7 @@ void ofxTLVMMNotes::draw(){
                 //intFrame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
                 note->frame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
                 cout << "outFrame(a): " << i << " - " << note->frame << endl;
+                sendOSC(note->pitch-60, note->frame);
             }
 
             //decay
@@ -192,6 +193,7 @@ void ofxTLVMMNotes::draw(){
                 //intFrame = ofxTween::map(thisTimelinePoint, t+a, t+a+d, 11, 15, clamp, easeLinear, easingType);
                 note->frame = ofxTween::map(thisTimelinePoint, t+a, t+a+d, 11, 15, clamp, easeLinear, easingType);
                 cout << "outFrame(d): " << i << " - " << note->frame << endl;
+                sendOSC(note->pitch-60, note->frame);
             }
 
             //sustain
@@ -201,6 +203,7 @@ void ofxTLVMMNotes::draw(){
                 //intFrame = 16;
                 note->frame = 16;
                 cout << "outFrame(s): " << i << " - " << note->frame << endl;
+                sendOSC(note->pitch-60, note->frame);
             }
             
             //release
@@ -211,11 +214,12 @@ void ofxTLVMMNotes::draw(){
                 note->frame = ofxTween::map(thisTimelinePoint, t+a+d+s, t+a+d+s+r, 17, 30, clamp, easeLinear, easingType);
 
                 cout << "outFrame(r): " << i << " - " << note->frame << endl;
+                sendOSC(note->pitch-60, note->frame);
             }
             
             //send my osc out port 7005
             //sendOSC(intFrame);
-            sendOSC(i, note->frame);
+            
             
             
         }// end if
@@ -366,7 +370,7 @@ void ofxTLVMMNotes::drawModalContent(){
 
 void ofxTLVMMNotes::sendOSC(int buffer, int val){
     ofxOscMessage m;
-    m.setAddress("/stillFrame");
+    m.setAddress("/vmmNotes");
     m.addIntArg(1);
     m.addIntArg(buffer);
     m.addIntArg(val);
