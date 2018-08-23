@@ -355,6 +355,27 @@ void ofxTLVMMNotes::drawModalContent(){
                                     noteDurations[i]->bounds.width, noteDurations[i]->bounds.height);
                     
                 }
+                
+                //test drawing a second modal
+                // -------------------------------------------
+                for(int i = 0; i < noteDurations.size(); i++){
+                    
+                    ofFill();
+                    //draw black box around all the note durations.
+                    ofDrawRectangle(screenPoint.x + noteDurations[i]->bounds.x + noteDurations[i]->bounds.width,
+                                    screenPoint.y + noteDurations[i]->bounds.y,
+                                    noteDurations[i]->bounds.width, noteDurations[i]->bounds.height);
+                    ofSetColor(200, 200, 200);
+                    timeline->getFont().drawString(noteDurations[i]->name,screenPoint.x + noteDurations[i]->bounds.width + noteDurations[i]->bounds.x+11,screenPoint.y + noteDurations[i]->bounds.y+10);
+                    ofNoFill();
+                    ofSetColor(40, 40, 40);
+                    ofDrawRectangle(screenPoint.x + noteDurations[i]->bounds.x + noteDurations[i]->bounds.width,
+                                    screenPoint.y + noteDurations[i]->bounds.y,
+                                    noteDurations[i]->bounds.width, noteDurations[i]->bounds.height);
+                    
+                }
+                // -------------------------------------------
+                
             }
             
             

@@ -10,12 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../src/ofxTLVMMNotes.cpp"
-            timestampString = "556505447.707562"
+            timestampString = "556654395.825094"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "703"
-            endingLineNumber = "703"
-            landmarkName = "ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight)"
+            startingLineNumber = "723"
+            endingLineNumber = "723"
+            landmarkName = "ofxTLVMMNotes::regionSelected(ofLongRange timeRange, ofRange valueRange)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -26,13 +26,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../src/ofxTLVMMNotes.cpp"
-            timestampString = "556505447.707625"
+            timestampString = "556654395.825534"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "707"
-            endingLineNumber = "707"
-            landmarkName = "ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight)"
-            landmarkType = "7">
+            startingLineNumber = "727"
+            endingLineNumber = "727"
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
