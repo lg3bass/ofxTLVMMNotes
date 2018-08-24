@@ -48,6 +48,8 @@ typedef struct {
     string name;
     int duration;
     float length;
+    int mode; //1-4 [ADSR]
+    
     
 } noteDuration;
 
@@ -168,6 +170,7 @@ protected:
     
     //note modal window
     void initializeNotes();
+    void setModalContent();
     
     vector<noteDuration*> noteDurations;
     ofVec2f durationWindowPosition;

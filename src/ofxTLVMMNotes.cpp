@@ -355,7 +355,7 @@ void ofxTLVMMNotes::drawModalContent(){
                                     noteDurations[i]->bounds.width, noteDurations[i]->bounds.height);
                     
                 }
-                
+                /*
                 //test drawing a second modal
                 // -------------------------------------------
                 for(int i = 0; i < noteDurations.size(); i++){
@@ -375,7 +375,7 @@ void ofxTLVMMNotes::drawModalContent(){
                     
                 }
                 // -------------------------------------------
-                
+                */
             }
             
             
@@ -626,11 +626,20 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
                     
                     note->duration = noteDurations[i]->duration;//TODO: do I need ->duration anymore?
                     note->length = noteDurations[i]->length;//TODO: do I need length
-                    note->ADSR[0] = 0.5;
-                    note->ADSR[1] = 0.0;
-                    note->ADSR[2] = noteDurations[i]->length;
-                    note->ADSR[3] = 1.0;
-                    
+
+                    //TODO: case statement
+                    if(noteDurations[i]->mode == 0){
+                        note->ADSR[0] = noteDurations[i]->length;
+                    }
+                    if(noteDurations[i]->mode == 1){
+                        note->ADSR[1] = noteDurations[i]->length;
+                    }
+                    if(noteDurations[i]->mode == 2){
+                        note->ADSR[2] = noteDurations[i]->length;
+                    }
+                    if(noteDurations[i]->mode == 3){
+                        note->ADSR[3] = noteDurations[i]->length;
+                    }
                     cout << "note: " << note->pitch << ":" << note->duration << ":" << note->length << endl;
                     
                 }
@@ -816,6 +825,7 @@ void ofxTLVMMNotes::sendNoteOnEvent(){
 
 }
 
+//-------------------------------------------------------
 void ofxTLVMMNotes::animateADSR(int keyindex){//TODO: not sure this is used anymore.
     ofLogNotice()   << "Accuracy of keyframes[" << keyindex << "]->time(miliseconds) ["
     << keyframes[keyindex]->time << "|" << currentTrackTime() << "]";
@@ -838,58 +848,135 @@ void ofxTLVMMNotes::animateADSR(int keyindex){//TODO: not sure this is used anym
 
 }
 
+//-------------------------------------------------------
 void ofxTLVMMNotes::initializeNotes(){
     
+    for(int j=0;j<4;j++){
+
+        noteDuration* nd;
+        nd = new noteDuration();
+        nd->name = "0";
+        nd->duration = 0;
+        nd->length = 0.0;
+        nd->mode = j;
+        noteDurations.push_back(nd);
+        
+        nd = new noteDuration();
+        nd->name = "1/32";
+        nd->duration = 31;
+        nd->length = 0.125;
+        nd->mode = j;
+        noteDurations.push_back(nd);
+        
+        nd = new noteDuration();
+        nd->name = "1/16";
+        nd->duration = 62;
+        nd->length = 0.25;
+        nd->mode = j;
+        noteDurations.push_back(nd);
+        
+        nd = new noteDuration();
+        nd->name = "1/8";
+        nd->duration = 125;
+        nd->length = 0.5;
+        nd->mode = j;
+        noteDurations.push_back(nd);
+        
+        nd = new noteDuration();
+        nd->name = "1/4";
+        nd->duration = 250;
+        nd->length = 1.0;
+        nd->mode = j;
+        noteDurations.push_back(nd);
+        
+        nd = new noteDuration();
+        nd->name = "1/2";
+        nd->duration = 500;
+        nd->length = 2.0;
+        nd->mode = j;
+        noteDurations.push_back(nd);
+        
+        nd = new noteDuration();
+        nd->name = "1";
+        nd->duration = 1000;
+        nd->length = 4.0;
+        nd->mode = j;
+        noteDurations.push_back(nd);
+        
+        nd = new noteDuration();
+        nd->name = "2";
+        nd->duration = 2000;
+        nd->length = 8.0;
+        nd->mode = j;
+        noteDurations.push_back(nd);
+        
+    }
     ///NOTE DURATIONS -------
-    noteDuration* nd;
-    nd = new noteDuration();
-    nd->name = "1/16";
-    nd->duration = 62;
-    nd->length = 0.25;
-    noteDurations.push_back(nd);
-    
-    nd = new noteDuration();
-    nd->name = "1/8";
-    nd->duration = 125;
-    nd->length = 0.5;
-    noteDurations.push_back(nd);
-    
-    nd = new noteDuration();
-    nd->name = "1/4";
-    nd->duration = 250;
-    nd->length = 1.0;
-    noteDurations.push_back(nd);
-    
-    nd = new noteDuration();
-    nd->name = "1/2";
-    nd->duration = 500;
-    nd->length = 2.0;
-    noteDurations.push_back(nd);
-    
-    nd = new noteDuration();
-    nd->name = "1";
-    nd->duration = 1000;
-    nd->length = 4.0;
-    noteDurations.push_back(nd);
-    
-    nd = new noteDuration();
-    nd->name = "2";
-    nd->duration = 2000;
-    nd->length = 8.0;
-    noteDurations.push_back(nd);
+
     
     durationBoxWidth  = 50;
     durationBoxHeight = 15;
     
+    int column = 0;
+    int y = 0;
+    
     //	easingWindowSeperatorHeight = 4;
     
+    //set the size of each box
     for(int i = 0; i < noteDurations.size(); i++){
-        noteDurations[i]->bounds = ofRectangle(0, i*durationBoxHeight, durationBoxWidth, durationBoxHeight);
+        float x = durationBoxWidth * noteDurations[i]->mode;
+        //float y = i*durationBoxHeight;
+        
+        
+        if(i % 8 == 0){
+            column++;
+            cout << "column " << column << endl;
+            y = 0;
+        }
+        y += durationBoxHeight;
+        
+        /*
+        if(i >= noteDurations.size()/4){
+            y -= (noteDurations.size()/4)*durationBoxHeight;
+        }
+        */
+        
+        cout << "bounds(" << x << "," << y << ")" << endl;
+        noteDurations[i]->bounds = ofRectangle(x, y, durationBoxWidth, durationBoxHeight);
+        
+        
         noteDurations[i]->id = i;
     }
-
+    
+    
 }
 
+
+void ofxTLVMMNotes::setModalContent(){
+    
+    
+    //attack
+    
+    
+    //decay
+    
+    
+    //sustain
+    
+    
+    //release
+    
+    
+    //sizing
+    durationBoxWidth  = 50;
+    durationBoxHeight = 15;
+    
+    //set the size of the attack section
+    
+    
+    //set the size of the decay section
+    
+}
 
 
 ofxTLKeyframe* ofxTLVMMNotes::newKeyframe(){
