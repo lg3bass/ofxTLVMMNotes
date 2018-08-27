@@ -145,7 +145,7 @@ void ofxTLVMMNotes::draw(){
                 timeline->getFont().drawString(note->getPitchDisplay(), screenPoint.x, screenPoint.y - 5);
             }
             else if(isKeyframeSelected(note)){
-
+                //selected note
                 ofSetColor(timeline->getColors().textColor);
                 drawNote(screenPoint, note, true);
                 
@@ -179,7 +179,7 @@ void ofxTLVMMNotes::draw(){
             //attack
             if(thisTimelinePoint >= t && thisTimelinePoint <= t+a){
                 ofSetColor(ofColor::red);
-                ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x, screenPoint.y + 20);
+                ofDrawBitmapString(note[i].getPitchDisplay(), t, screenPoint.y + 20);
                 //intFrame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
                 note->frame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
                 cout << "outFrame(a): " << i << " - " << note->frame << endl;
@@ -189,7 +189,7 @@ void ofxTLVMMNotes::draw(){
             //decay
             if(thisTimelinePoint >= t+a && thisTimelinePoint <= t+a+d) {
                 ofSetColor(ofColor::green);
-                ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x+50, screenPoint.y + 20);
+                ofDrawBitmapString(note[i].getPitchDisplay(), t+a, screenPoint.y + 20);
                 //intFrame = ofxTween::map(thisTimelinePoint, t+a, t+a+d, 11, 15, clamp, easeLinear, easingType);
                 note->frame = ofxTween::map(thisTimelinePoint, t+a, t+a+d, 11, 15, clamp, easeLinear, easingType);
                 cout << "outFrame(d): " << i << " - " << note->frame << endl;
@@ -199,7 +199,7 @@ void ofxTLVMMNotes::draw(){
             //sustain
             if(thisTimelinePoint >= t+a+d && thisTimelinePoint <= t+a+d+s) {
                 ofSetColor(ofColor::blue);
-                ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x+100, screenPoint.y + 20);
+                ofDrawBitmapString(note[i].getPitchDisplay(), t+a+d, screenPoint.y + 20);
                 //intFrame = 16;
                 note->frame = 16;
                 cout << "outFrame(s): " << i << " - " << note->frame << endl;
@@ -209,7 +209,7 @@ void ofxTLVMMNotes::draw(){
             //release
             if(thisTimelinePoint >= t+a+d+s && thisTimelinePoint <= t+a+d+s+r) {
                 ofSetColor(ofColor::lightBlue);
-                ofDrawBitmapString(note[i].getPitchDisplay(), screenPoint.x+150, screenPoint.y + 20);
+                ofDrawBitmapString(note[i].getPitchDisplay(), t+a+d+s, screenPoint.y + 20);
                 //intFrame = ofxTween::map(thisTimelinePoint, t+a+d+s, t+a+d+s+r, 17, 30, clamp, easeLinear, easingType);
                 note->frame = ofxTween::map(thisTimelinePoint, t+a+d+s, t+a+d+s+r, 17, 30, clamp, easeLinear, easingType);
 
@@ -817,8 +817,6 @@ void ofxTLVMMNotes::sendNoteOnEvent(){
             bangFired(keyframes[i]);
             lastBangTime = ofGetElapsedTimef();
             
-            //animateASDR
-            animateADSR(i);
         }
     }
     lastTimelinePoint = thisTimelinePoint;
@@ -826,31 +824,9 @@ void ofxTLVMMNotes::sendNoteOnEvent(){
 }
 
 //-------------------------------------------------------
-void ofxTLVMMNotes::animateADSR(int keyindex){//TODO: not sure this is used anymore.
-    ofLogNotice()   << "Accuracy of keyframes[" << keyindex << "]->time(miliseconds) ["
-    << keyframes[keyindex]->time << "|" << currentTrackTime() << "]";
-    
-    //convert keyframe to note
-    ofxTLVMMNote* note = (ofxTLVMMNote*)keyframes[keyindex];
-    
-    //how long is one measure
-    double oneMeasure = 4.0/(timeline->getBPM()/60.);
-    
-    //calculate the total duration of the note
-    long totalDuration = note->duration + 250;
-    
-    //get the current track time
-    long thisTimelinePoint = currentTrackTime();
-    
-    if(thisTimelinePoint >= keyframes[keyindex]->time && thisTimelinePoint <= (keyframes[keyindex]->time + totalDuration)){
-        cout << "in note" << endl;
-    }
-
-}
-
-//-------------------------------------------------------
 void ofxTLVMMNotes::initializeNotes(){
     
+    //4x for ADSR
     for(int j=0;j<4;j++){
 
         noteDuration* nd;
@@ -912,7 +888,6 @@ void ofxTLVMMNotes::initializeNotes(){
         
     }
     ///NOTE DURATIONS -------
-
     
     durationBoxWidth  = 50;
     durationBoxHeight = 15;
@@ -925,9 +900,7 @@ void ofxTLVMMNotes::initializeNotes(){
     //set the size of each box
     for(int i = 0; i < noteDurations.size(); i++){
         float x = durationBoxWidth * noteDurations[i]->mode;
-        //float y = i*durationBoxHeight;
-        
-        
+
         if(i % 8 == 0){
             column++;
             cout << "column " << column << endl;
@@ -935,49 +908,13 @@ void ofxTLVMMNotes::initializeNotes(){
         }
         y += durationBoxHeight;
         
-        /*
-        if(i >= noteDurations.size()/4){
-            y -= (noteDurations.size()/4)*durationBoxHeight;
-        }
-        */
-        
         cout << "bounds(" << x << "," << y << ")" << endl;
         noteDurations[i]->bounds = ofRectangle(x, y, durationBoxWidth, durationBoxHeight);
-        
         
         noteDurations[i]->id = i;
     }
     
-    
 }
-
-
-void ofxTLVMMNotes::setModalContent(){
-    
-    
-    //attack
-    
-    
-    //decay
-    
-    
-    //sustain
-    
-    
-    //release
-    
-    
-    //sizing
-    durationBoxWidth  = 50;
-    durationBoxHeight = 15;
-    
-    //set the size of the attack section
-    
-    
-    //set the size of the decay section
-    
-}
-
 
 ofxTLKeyframe* ofxTLVMMNotes::newKeyframe(){
 

@@ -166,11 +166,9 @@ protected:
 
     
     void sendNoteOnEvent();
-    void animateADSR(int keyindex);
     
     //note modal window
     void initializeNotes();
-    void setModalContent();
     
     vector<noteDuration*> noteDurations;
     ofVec2f durationWindowPosition;
