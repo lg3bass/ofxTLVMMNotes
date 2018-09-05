@@ -126,6 +126,8 @@ void ofxTLVMMNotes::draw(){
     ofPushStyle();
     
     ofFill();
+    
+    //continually loop through all the keyframes.
     for(int i = 0; i < keyframes.size(); i++){
         //make sure it's on screen
         if(isKeyframeIsInBounds(keyframes[i])){
@@ -143,8 +145,7 @@ void ofxTLVMMNotes::draw(){
                 //draw note name
                 ofSetColor(timeline->getColors().textColor);
                 timeline->getFont().drawString(note->getPitchDisplay(), screenPoint.x, screenPoint.y - 5);
-            }
-            else if(isKeyframeSelected(note)){
+            } else if(isKeyframeSelected(note)){
                 //selected note
                 ofSetColor(timeline->getColors().textColor);
                 drawNote(screenPoint, note, true);
@@ -153,17 +154,18 @@ void ofxTLVMMNotes::draw(){
                 ofSetColor(timeline->getColors().textColor);
                 timeline->getFont().drawString(note->getPitchDisplay(), screenPoint.x, screenPoint.y - 5);
             } else {
-            
+                
+                //just draw the note
                 ofSetColor(timeline->getColors().keyColor);
                 drawNote(screenPoint,note, false);
                 
             }
             
-            //draw red dot where the key is
+            //additionally draw red dot where the key is
             ofSetColor(ofColor::red);
             ofDrawCircle(screenPoint, 1);
 
-            
+            /*
             //draw my note info
             long thisTimelinePoint = currentTrackTime();
             float t = keyframes[i]->time;
@@ -220,9 +222,10 @@ void ofxTLVMMNotes::draw(){
             //send my osc out port 7005
             //sendOSC(intFrame);
             
+             */
             
             
-        }// end if
+        }// end if isKeyframeIsInBounds
         
     }// end for
     
@@ -390,6 +393,10 @@ void ofxTLVMMNotes::drawModalContent(){
 }
 
 void ofxTLVMMNotes::sendOSC(int buffer, int val){
+    
+    //only create a message if the val is different
+    
+    
     ofxOscMessage m;
     m.setAddress("/vmmNotes");
     m.addIntArg(1);
@@ -397,6 +404,7 @@ void ofxTLVMMNotes::sendOSC(int buffer, int val){
     m.addIntArg(val);
     sender.sendMessage(m, false);
     
+    //cout << ofToString(m) << endl;
 }
 
 int ofxTLVMMNotes::getNote() {
@@ -736,9 +744,17 @@ void ofxTLVMMNotes::regionSelected(ofLongRange timeRange, ofRange valueRange){
 
 void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
     
+    //calculate timing
+    long thisTimelinePoint = currentTrackTime();
+    //float t = keyframes[i]->time;
+    float time = note->time;
+    float oneBeatInMS = getNoteDuration(timeline->getBPM(), 1.0, false);
+    
+
+    
     //double oneBeat = 1.0/(timeline->getBPM()/60.0);
     double oneBeat = getNoteDuration(timeline->getBPM(), 1.0, true);//60 is fps
-    double beatLengthOnTimeline = screenXForTime(oneBeat) - screenXForTime(0);
+    double oneBeatWidthOnTimeline = screenXForTime(oneBeat) - screenXForTime(0);
 
     int h = 10;
     if(highlight){
@@ -747,10 +763,18 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
     
     int p = h/2;
     
-    float a = beatLengthOnTimeline*note->ADSR[0];
-    float d = beatLengthOnTimeline*note->ADSR[1];
-    float s = beatLengthOnTimeline*note->ADSR[2];
-    float r = beatLengthOnTimeline*note->ADSR[3];
+    //calculate the width of each ASDR on the timeline.
+    float a = oneBeatWidthOnTimeline*note->ADSR[0];
+    float d = oneBeatWidthOnTimeline*note->ADSR[1];
+    float s = oneBeatWidthOnTimeline*note->ADSR[2];
+    float r = oneBeatWidthOnTimeline*note->ADSR[3];
+    
+    //calculate how long each ADSR component is in milliseconds.
+    float aMS = oneBeatInMS*note->ADSR[0];
+    float dMS = oneBeatInMS*note->ADSR[1];
+    float sMS = oneBeatInMS*note->ADSR[2];
+    float rMS = oneBeatInMS*note->ADSR[3];
+    
     
     ofPushStyle();
         if(highlight){
@@ -764,7 +788,8 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
     ofPopStyle();
     
     
-    //draw attack ramp
+    //draw the notes on the timeline
+    //ATTACK
     ofPushStyle();
     ofSetColor(255, 0, 0); 
         ofBeginShape();
@@ -774,7 +799,7 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         ofEndShape();
     ofPopStyle();
     
-    //draw decay
+    //DECAY
     ofPushStyle();
         ofSetColor(0, 255, 0);
         ofBeginShape();
@@ -785,13 +810,13 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         ofEndShape();
     ofPopStyle();
     
-    //draw sustain
+    //SUSTAIN
     ofPushStyle();
         ofSetColor(0, 0, 255);
         ofDrawRectangle(pos.x+a+d,pos.y-p, s, h);
     ofPopStyle();
     
-    //draw triangle
+    //RELEASE
     ofPushStyle();
         ofSetColor(0, 255, 255);
         ofBeginShape();
@@ -800,6 +825,65 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
             ofVertex(pos.x+a+d+s+1, pos.y-p);
         ofEndShape();
     ofPopStyle();
+    
+    //ADSR components
+    //attack
+    if(thisTimelinePoint >= time && thisTimelinePoint <= time+aMS){
+        note->frame = ofxTween::map(thisTimelinePoint, time, time+aMS, 0, 11, clamp, easeLinear, easingType);
+        
+        ofSetColor(ofColor::lightYellow);
+        ofDrawBitmapString(note->frame, pos.x, pos.y + 20);
+        
+        
+        if(note->frame != note->lastFrame){
+            cout << "outFrame(a): " << note->pitch-60 << " - " << note->frame << endl;
+            sendOSC(note->pitch-60, note->frame);
+            note->lastFrame = note->frame;
+        }
+    }
+    
+    //decay
+    if(thisTimelinePoint >= time+aMS && thisTimelinePoint <= time+aMS+dMS) {
+        note->frame = ofxTween::map(thisTimelinePoint, time+aMS, time+aMS+dMS, 11, 16, clamp, easeLinear, easingType);
+
+        ofSetColor(ofColor::lightYellow);
+        ofDrawBitmapString(note->frame, pos.x+a, pos.y + 20);
+        
+        if(note->frame != note->lastFrame){
+            cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
+            sendOSC(note->pitch-60, note->frame);
+            note->lastFrame = note->frame;
+        }
+
+    }
+    
+    //sustain
+    if(thisTimelinePoint >= time+aMS+dMS && thisTimelinePoint <= time+aMS+dMS+sMS) {
+        note->frame = 16;
+        
+        ofSetColor(ofColor::lightYellow);
+        ofDrawBitmapString(note->frame, pos.x+a+d, pos.y + 20);
+
+        if(note->frame != note->lastFrame){
+            cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
+            sendOSC(note->pitch-60, note->frame);
+            note->lastFrame = note->frame;
+        }
+    }
+    
+    //release
+    if(thisTimelinePoint >= time+aMS+dMS+sMS && thisTimelinePoint <= time+aMS+dMS+sMS+rMS) {
+        note->frame = ofxTween::map(thisTimelinePoint, time+aMS+dMS+sMS, time+aMS+dMS+sMS+rMS, 17, 30, clamp, easeLinear, easingType);
+        
+        ofSetColor(ofColor::lightYellow);
+        ofDrawBitmapString(note->frame, pos.x+a+d+s, pos.y + 20);
+
+        if(note->frame != note->lastFrame){
+            cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
+            sendOSC(note->pitch-60, note->frame);
+            note->lastFrame = note->frame;
+        }
+    }
 
 }
 

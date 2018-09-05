@@ -80,6 +80,7 @@ public:
     bool notePlaying;
     
     int frame;
+    int lastFrame;
 
 };
 
