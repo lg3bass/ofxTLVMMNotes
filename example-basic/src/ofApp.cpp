@@ -10,7 +10,7 @@ void ofApp::setup(){
     ofEnableAlphaBlending();
     
     timeline.setup();
-    timeline.setLoopType(OF_LOOP_NONE);
+    timeline.setLoopType(OF_LOOP_NORMAL);
     timeline.setBPM(120.0);
     timeline.toggleSnapToBPM();
     timeline.setShowBPMGrid(true);
