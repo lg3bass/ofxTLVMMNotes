@@ -10,6 +10,8 @@
 #include "ofxHotKeys.h"
 
 
+//--------------------------------------------------------------------------------------------
+//ofxTLVMMNote
 
 ofxTLVMMNote::ofxTLVMMNote(int p){
     pitch = p;
@@ -19,6 +21,7 @@ ofxTLVMMNote::ofxTLVMMNote(int p){
     notePlaying = false;
     
     frame = 0;
+    lastFrame = -1;
 }
 
 string ofxTLVMMNote::getPitchDisplay() {
@@ -72,8 +75,8 @@ string ofxTLVMMNote::getPitchDisplay() {
     return ofToString(display);
 }
 
-//----------------------------
-
+//--------------------------------------------------------------------------------------------
+//ofxTLVMMNotes
 ofxTLVMMNotes::ofxTLVMMNotes(){
     
     initializeNotes();
@@ -568,7 +571,7 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
                     ofxTLVMMNote* note = (ofxTLVMMNote*)selectedKeyframes[k];
                     
                     note->duration = noteDurations[i]->duration;//TODO: do I need ->duration anymore?
-                    note->length = noteDurations[i]->length;//TODO: do I need length
+                    //note->length = noteDurations[i]->length;//TODO: do I need length
 
                     //TODO: case statement
                     if(noteDurations[i]->mode == 0){
@@ -583,7 +586,7 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
                     if(noteDurations[i]->mode == 3){
                         note->ADSR[3] = noteDurations[i]->length;
                     }
-                    cout << "note: " << note->pitch << ":" << note->duration << ":" << note->length << endl;
+                    cout << "note: " << note->pitch << ":" << note->duration << endl;
                     
                 }
                 timeline->flagTrackModified(this);
@@ -608,6 +611,7 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
             quantizeNoteByPos(note);
             
             cout << "ofxTLVMMNotes::mouseReleased - CREATE NOTE" << "[" << note->pitch << ":" << note->value << "]" << endl;
+            
         }
         
         
@@ -948,13 +952,13 @@ void ofxTLVMMNotes::restoreKeyframe(ofxTLKeyframe* key, ofxXmlSettings& xmlStore
     note->pitch = xmlStore.getValue("pitch", valueRange.min);
     note->value = xmlStore.getValue("value", 0.5);
     note->duration = xmlStore.getValue("duration", 0);
-    note->length = xmlStore.getValue("length", 0.0);
+    //note->length = xmlStore.getValue("length", 0.0);
     note->ADSR[0] = xmlStore.getValue("attack", 0.0);
     note->ADSR[1] = xmlStore.getValue("decay", 0.0);
     note->ADSR[2] = xmlStore.getValue("sustain", 0.0);
     note->ADSR[3] = xmlStore.getValue("release", 0.0);
     note->notePlaying = false;
-    
+    quantizeNoteByPos(note);//kinda works. too many calls to write files.
 }
 
 void ofxTLVMMNotes::storeKeyframe(ofxTLKeyframe* key, ofxXmlSettings& xmlStore){
@@ -962,7 +966,7 @@ void ofxTLVMMNotes::storeKeyframe(ofxTLKeyframe* key, ofxXmlSettings& xmlStore){
     xmlStore.addValue("pitch", note->pitch);
     xmlStore.addValue("value", note->value);
     xmlStore.addValue("duration", note->duration);
-    xmlStore.addValue("length", note->length);
+    //xmlStore.addValue("length", note->length);
     xmlStore.addValue("attack", note->ADSR[0]);
     xmlStore.addValue("decay", note->ADSR[1]);
     xmlStore.addValue("sustain", note->ADSR[2]);

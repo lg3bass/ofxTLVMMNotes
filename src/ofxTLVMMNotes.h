@@ -66,7 +66,7 @@ public:
     ofxTLVMMNote(int p);
     int pitch;
     int duration;
-    float length;
+    //float length;
     string getPitchDisplay();
     
     //ADSR
