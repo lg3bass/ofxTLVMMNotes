@@ -14,15 +14,8 @@
 ofxTLVMMNote::ofxTLVMMNote(int p){
     pitch = p;
     duration = 0;
-    //default values for testing purposes
-    attackDuration = 0.0625;
-    decayDuration = 0.0625;
-    sustainDuration = 0.125;
-    releaseDuration = 0.125;
     
-    //1.0 == quarter note
-    ADSR = ofVec4f(0.5, 0.5, 2.0, 1.0); //default values
-    //ADSR = ofVec4f(0.0625, 0.0625, 0.125, 0.125); //TBD - testing
+    ADSR = ofVec4f(0.5, 0.5, 2.0, 1.0); //default values 1.0 = quarter
     notePlaying = false;
     
     frame = 0;
@@ -165,65 +158,7 @@ void ofxTLVMMNotes::draw(){
             ofSetColor(ofColor::red);
             ofDrawCircle(screenPoint, 1);
 
-            /*
-            //draw my note info
-            long thisTimelinePoint = currentTrackTime();
-            float t = keyframes[i]->time;
-            float oneBeatInMS = getNoteDuration(timeline->getBPM(), 1.0, false);
-            
-            //calculate how long each ADSR component is.
-            float a = (note->ADSR[0]*oneBeatInMS);
-            float d = (note->ADSR[1]*oneBeatInMS);
-            float s = (note->ADSR[2]*oneBeatInMS);
-            float r = (note->ADSR[3]*oneBeatInMS);
-            
-            //ADSR components
-            //attack
-            if(thisTimelinePoint >= t && thisTimelinePoint <= t+a){
-                ofSetColor(ofColor::red);
-                ofDrawBitmapString(note[i].getPitchDisplay(), t, screenPoint.y + 20);
-                //intFrame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
-                note->frame = ofxTween::map(thisTimelinePoint, t, t+a, 0, 10, clamp, easeLinear, easingType);
-                cout << "outFrame(a): " << i << " - " << note->frame << endl;
-                sendOSC(note->pitch-60, note->frame);
-            }
-
-            //decay
-            if(thisTimelinePoint >= t+a && thisTimelinePoint <= t+a+d) {
-                ofSetColor(ofColor::green);
-                ofDrawBitmapString(note[i].getPitchDisplay(), t+a, screenPoint.y + 20);
-                //intFrame = ofxTween::map(thisTimelinePoint, t+a, t+a+d, 11, 15, clamp, easeLinear, easingType);
-                note->frame = ofxTween::map(thisTimelinePoint, t+a, t+a+d, 11, 15, clamp, easeLinear, easingType);
-                cout << "outFrame(d): " << i << " - " << note->frame << endl;
-                sendOSC(note->pitch-60, note->frame);
-            }
-
-            //sustain
-            if(thisTimelinePoint >= t+a+d && thisTimelinePoint <= t+a+d+s) {
-                ofSetColor(ofColor::blue);
-                ofDrawBitmapString(note[i].getPitchDisplay(), t+a+d, screenPoint.y + 20);
-                //intFrame = 16;
-                note->frame = 16;
-                cout << "outFrame(s): " << i << " - " << note->frame << endl;
-                sendOSC(note->pitch-60, note->frame);
-            }
-            
-            //release
-            if(thisTimelinePoint >= t+a+d+s && thisTimelinePoint <= t+a+d+s+r) {
-                ofSetColor(ofColor::lightBlue);
-                ofDrawBitmapString(note[i].getPitchDisplay(), t+a+d+s, screenPoint.y + 20);
-                //intFrame = ofxTween::map(thisTimelinePoint, t+a+d+s, t+a+d+s+r, 17, 30, clamp, easeLinear, easingType);
-                note->frame = ofxTween::map(thisTimelinePoint, t+a+d+s, t+a+d+s+r, 17, 30, clamp, easeLinear, easingType);
-
-                cout << "outFrame(r): " << i << " - " << note->frame << endl;
-                sendOSC(note->pitch-60, note->frame);
-            }
-            
-            //send my osc out port 7005
-            //sendOSC(intFrame);
-            
-             */
-            
+           
             
         }// end if isKeyframeIsInBounds
         
@@ -669,8 +604,10 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
         //snap the notes on the grid.
         for(int k = 0; k < selectedKeyframes.size(); k++) {
             ofxTLVMMNote* note = (ofxTLVMMNote*)selectedKeyframes[k];
-            cout << "ofxTLVMMNotes::mouseReleased - CREATE NOTE" << endl;
+            
             quantizeNoteByPos(note);
+            
+            cout << "ofxTLVMMNotes::mouseReleased - CREATE NOTE" << "[" << note->pitch << ":" << note->value << "]" << endl;
         }
         
         
@@ -711,8 +648,6 @@ void ofxTLVMMNotes::quantizeNoteByPitch(ofxTLVMMNote* note){
     }
     
 }
-
-
 
 //keys pressed events, and nuding from arrow keys with normalized nudge amount 0 - 1.0
 void ofxTLVMMNotes::keyPressed(ofKeyEventArgs& args){

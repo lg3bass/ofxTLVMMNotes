@@ -70,11 +70,6 @@ public:
     string getPitchDisplay();
     
     //ADSR
-    unsigned long long attackDuration;
-    unsigned long long decayDuration;
-    unsigned long long sustainDuration;
-    unsigned long long releaseDuration;
-    
     ofVec4f ADSR;
     
     bool notePlaying;
