@@ -3,6 +3,7 @@
         <pitch>64</pitch>
         <value>0.346153855</value>
         <duration>0</duration>
+        <length>0.000000000</length>
         <attack>0.500000000</attack>
         <decay>0.500000000</decay>
         <sustain>2.000000000</sustain>
@@ -14,6 +15,7 @@
         <pitch>67</pitch>
         <value>0.576923132</value>
         <duration>0</duration>
+        <length>0.000000000</length>
         <attack>0.500000000</attack>
         <decay>0.500000000</decay>
         <sustain>2.000000000</sustain>
@@ -25,6 +27,7 @@
         <pitch>61</pitch>
         <value>0.115384623</value>
         <duration>0</duration>
+        <length>0.000000000</length>
         <attack>0.500000000</attack>
         <decay>0.500000000</decay>
         <sustain>2.000000000</sustain>

@@ -89,6 +89,10 @@ public:
     ofxTLVMMNotes();
     virtual ~ofxTLVMMNotes();
     
+    int track;  //store the current track
+    int page;   //current page
+    int clip;   //current clip
+    
     virtual void update();
     virtual void draw();
     
