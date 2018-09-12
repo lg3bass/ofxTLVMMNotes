@@ -53,6 +53,28 @@ typedef struct {
     
 } noteDuration;
 
+//we need a custom event to send the osc back up the main application. I THINK????
+class NoteOscMessageEvent : public ofEventArgs {
+
+public:
+    ofxOscMessage m;
+    string message;
+    int value;
+    
+    void composeIntOscMsg(int track, string msg, int buffer, int val){
+        message = "/" + msg;
+        
+        m.clear();
+        m.setAddress(message);
+        m.addIntArg(track);
+        m.addIntArg(buffer);
+        m.addIntArg(val);
+    }
+
+    static ofEvent <NoteOscMessageEvent> events;
+    
+};
+
 
 class ofxTLVMMNote : public ofxTLKeyframe {
 

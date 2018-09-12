@@ -9,6 +9,9 @@
 #include "ofxTimeline.h"
 #include "ofxHotKeys.h"
 
+// setup the events to pass back
+ofEvent <NoteOscMessageEvent> NoteOscMessageEvent::events;
+
 
 //--------------------------------------------------------------------------------------------
 //ofxTLVMMNote
@@ -332,17 +335,21 @@ void ofxTLVMMNotes::drawModalContent(){
 
 void ofxTLVMMNotes::sendOSC(int buffer, int val){
     
-    //only create a message if the val is different
-    
-    
+    //OLD DIRECT WAY.
+    /*
     ofxOscMessage m;
     m.setAddress("/vmmNotes");
-    m.addIntArg(1);
+    m.addIntArg(track+1);
     m.addIntArg(buffer);
     m.addIntArg(val);
     sender.sendMessage(m, false);
+    */
     
-    //cout << ofToString(m) << endl;
+    //NEW EVENT DRIVEN
+    static NoteOscMessageEvent vmmOscEvent;
+    vmmOscEvent.composeIntOscMsg(track+1, "vmmNotes", buffer, val);
+    ofNotifyEvent(NoteOscMessageEvent::events, vmmOscEvent);
+    
 }
 
 int ofxTLVMMNotes::getNote() {
@@ -387,7 +394,11 @@ void ofxTLVMMNotes::bangFired(ofxTLKeyframe* key){
     ofxTLVMMNote* note = (ofxTLVMMNote*)key;
     cout << "[pitch " << ofToString(note->pitch) << "]," <<
             "[frame " << ofToString(timeline->getCurrentFrame()) << "]," <<
-            "[duration " << ofToString(note->duration) << "]" << endl;
+            "[ADSR " << ofToString(note->ADSR[0]) <<
+            "," << ofToString(note->ADSR[1]) <<
+            "," << ofToString(note->ADSR[2]) <<
+            "," << ofToString(note->ADSR[3]) <<
+            "]" << endl;
     
     //Notify event up to
     ///addons/ofxTimeline/src/ofxTLEvents.h:109:	ofEvent<ofxTLBangEventArgs> bangFired;
@@ -400,11 +411,12 @@ int ofxTLVMMNotes::getNoteAtMillis(long millis){
     if(keyframes.size() == 0){
         return 0;
     }
-    for(int i = 1; i < keyframes.size(); i++){
+    for(int i = 0; i < keyframes.size(); i++){
+        ofxTLVMMNote* note  = (ofxTLVMMNote*)keyframes[i];
+        return note->pitch;
         
         if(keyframes[i]->time == millis) {
-            ofxTLVMMNote* note  = (ofxTLVMMNote*)keyframes[i];
-            return note->pitch;
+            
         }
     }
     
@@ -775,8 +787,8 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         
         
         if(note->frame != note->lastFrame){
-            cout << "outFrame(a): " << note->pitch-60 << " - " << note->frame << endl;
-            sendOSC(note->pitch-60, note->frame);
+            //cout << "outFrame(a): " << note->pitch-60 << " - " << note->frame << endl;
+            //sendOSC(note->pitch-60, note->frame);
             note->lastFrame = note->frame;
         }
     }
@@ -789,8 +801,8 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         ofDrawBitmapString(note->frame, pos.x+a, pos.y + 20);
         
         if(note->frame != note->lastFrame){
-            cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
-            sendOSC(note->pitch-60, note->frame);
+            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
+            //sendOSC(note->pitch-60, note->frame);
             note->lastFrame = note->frame;
         }
 
@@ -804,8 +816,8 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         ofDrawBitmapString(note->frame, pos.x+a+d, pos.y + 20);
 
         if(note->frame != note->lastFrame){
-            cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
-            sendOSC(note->pitch-60, note->frame);
+            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
+            //sendOSC(note->pitch-60, note->frame);
             note->lastFrame = note->frame;
         }
     }
@@ -818,8 +830,8 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         ofDrawBitmapString(note->frame, pos.x+a+d+s, pos.y + 20);
 
         if(note->frame != note->lastFrame){
-            cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
-            sendOSC(note->pitch-60, note->frame);
+            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
+            //sendOSC(note->pitch-60, note->frame);
             note->lastFrame = note->frame;
         }
     }
@@ -926,12 +938,12 @@ void ofxTLVMMNotes::initializeNotes(){
 
         if(i % 8 == 0){
             column++;
-            cout << "column " << column << endl;
+            //cout << "column " << column << endl;
             y = 0;
         }
         y += durationBoxHeight;
         
-        cout << "bounds(" << x << "," << y << ")" << endl;
+        //cout << "bounds(" << x << "," << y << ")" << endl;
         noteDurations[i]->bounds = ofRectangle(x, y, durationBoxWidth, durationBoxHeight);
         
         noteDurations[i]->id = i;
