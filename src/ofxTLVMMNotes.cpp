@@ -376,7 +376,11 @@ float ofxTLVMMNotes::getNoteDuration(float BPM, float value, bool normalized = f
     
 }
 
-
+//test function called from outside.
+void ofxTLVMMNotes::playNote(float millis){
+    
+    cout << "NOTE: " << getNoteAtMillis(millis) << endl;
+}
 
 void ofxTLVMMNotes::bangFired(ofxTLKeyframe* key){
 

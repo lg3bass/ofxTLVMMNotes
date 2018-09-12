@@ -135,6 +135,8 @@ public:
     int getNoteAtPercent(float percent);
     float getNoteDuration(float BPM, float value, bool normalized);
     
+    void playNote(float millis);
+    
     //events
     long lastTimelinePoint;
     float lastBangTime; //just for display
