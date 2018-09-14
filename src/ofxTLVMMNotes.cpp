@@ -378,9 +378,101 @@ float ofxTLVMMNotes::getNoteDuration(float BPM, float value, bool normalized = f
 
 //test function called from outside.
 void ofxTLVMMNotes::playNote(float millis){
-    
-    cout << "NOTE: " << getNoteAtMillis(millis) << endl;
+    //test
+    //getNoteAtMillis(millis);
+    playNote2(millis);
+
 }
+
+int ofxTLVMMNotes::playNote2(long millis){
+    
+    //get out if no frames.
+    if(keyframes.size() == 0){
+        return 0;
+    }
+    
+    //calculate how long in ms is one beat at current tempo
+    float oneBeatInMS = getNoteDuration(timeline->getBPM(), 1.0, false);
+    
+    //continually loop through all the keyframes.
+    for(int i = 0; i < keyframes.size(); i++){
+        
+        //get timing from VMMtimeline
+        long thisTimelinePoint = millis;
+        
+        
+        //make sure it's on screen
+        //if(isKeyframeIsInBounds(keyframes[i])){
+        //we know the type because we created it in newKeyframe()
+        //so we can safely cast
+        ofxTLVMMNote* note = (ofxTLVMMNote*)keyframes[i];
+        float time = note->time;
+        //float time = keyframes[i]->time; //thought this might be the problem
+        
+        //calculate how long each ADSR component is in milliseconds.
+        float aMS = oneBeatInMS*note->ADSR[0];
+        float dMS = oneBeatInMS*note->ADSR[1];
+        float sMS = oneBeatInMS*note->ADSR[2];
+        float rMS = oneBeatInMS*note->ADSR[3];
+        
+        //ADSR components
+        //attack
+        if(millis >= time && millis <= time+aMS){
+            cout << track << " NOTE[attack] " << note->pitch-60 << " - " << note->time << endl;
+
+//            note->frame = ofxTween::map(millis, time, time+aMS, 0, 11, clamp, easeLinear, easingType);
+//            if(note->frame != note->lastFrame){
+//                cout << track << " NOTE[attack] " << note->pitch-60 << " - " << note->frame << endl;
+//                //sendOSC(note->pitch-60, note->frame);
+//                note->lastFrame = note->frame;
+//            }
+        }
+        
+        //decay
+        if(millis >= time+aMS && millis <= time+aMS+dMS) {
+            cout << track << " NOTE[decay] " << note->pitch-60 << " - " << note->time << endl;
+            
+//            note->frame = ofxTween::map(millis, time+aMS, time+aMS+dMS, 11, 16, clamp, easeLinear, easingType);
+//            if(note->frame != note->lastFrame){
+//                cout << track << " NOTE[decay] " << note->pitch-60 << " - " << note->frame << endl;
+//                //sendOSC(note->pitch-60, note->frame);
+//                note->lastFrame = note->frame;
+//            }
+            
+        }
+        
+        //sustain
+        if(millis >= time+aMS+dMS && millis <= time+aMS+dMS+sMS) {
+            cout << track << " NOTE[decay] " << note->pitch-60 << " - " << note->time << endl;
+
+//            note->frame = 16;
+//            if(note->frame != note->lastFrame){
+//                cout << track << " NOTE[sustain] " << note->pitch-60 << " - " << note->frame << endl;
+//                //sendOSC(note->pitch-60, note->frame);
+//                note->lastFrame = note->frame;
+//            }
+        }
+        
+        //release
+        if(millis >= time+aMS+dMS+sMS && millis <= time+aMS+dMS+sMS+rMS) {
+            cout << track << " NOTE[release] " << note->pitch-60 << " - " << note->time << endl;
+            
+            
+//            note->frame = ofxTween::map(millis, time+aMS+dMS+sMS, time+aMS+dMS+sMS+rMS, 17, 30, clamp, easeLinear, easingType);
+//            if(note->frame != note->lastFrame){
+//                cout << track << " NOTE[release] " << note->pitch-60 << " - " << note->frame << endl;
+//                //sendOSC(note->pitch-60, note->frame);
+//                note->lastFrame = note->frame;
+//            }
+        }
+        
+        return note->pitch;
+        
+        //}// end if
+    }// end for
+}
+
+
 
 void ofxTLVMMNotes::bangFired(ofxTLKeyframe* key){
 
@@ -412,14 +504,21 @@ void ofxTLVMMNotes::bangFired(ofxTLKeyframe* key){
 
 int ofxTLVMMNotes::getNoteAtMillis(long millis){
     
+    //calculate how long in ms is one beat at current tempo
+    float oneBeatInMS = getNoteDuration(timeline->getBPM(), 1.0, false);
+    
+    
     if(keyframes.size() == 0){
         return 0;
     }
     for(int i = 0; i < keyframes.size(); i++){
         ofxTLVMMNote* note  = (ofxTLVMMNote*)keyframes[i];
-        return note->pitch;
+        float d = note->ADSR[0] + note->ADSR[1] + note->ADSR[2] + note->ADSR[3];
         
-        if(keyframes[i]->time == millis) {
+        if(millis > keyframes[i]->time && millis < keyframes[i]->time+(oneBeatInMS*d)) {
+            cout << track << " NOTE[" << note->pitch << "-" << note->time << "] -- " << millis << endl;
+            
+            return note->pitch;
             
         }
     }

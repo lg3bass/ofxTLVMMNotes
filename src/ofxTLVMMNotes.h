@@ -136,6 +136,7 @@ public:
     float getNoteDuration(float BPM, float value, bool normalized);
     
     void playNote(float millis);
+    int playNote2(long millis);
     
     //events
     long lastTimelinePoint;
