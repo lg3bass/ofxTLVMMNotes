@@ -93,8 +93,10 @@ public:
     
     //ADSR
     ofVec4f ADSR;
+    int seg[4] = {0,11,16,30};
     
     bool notePlaying;
+    int state = 0;
     
     int frame;
     int lastFrame;
@@ -136,7 +138,8 @@ public:
     float getNoteDuration(float BPM, float value, bool normalized);
     
     void playNote(float millis);
-    int playNote2(long millis);
+    void playNote2(long millis);
+    void playNote3(long millis);
     
     //events
     long lastTimelinePoint;

@@ -381,15 +381,15 @@ void ofxTLVMMNotes::playNote(float millis){
     //test
     //getNoteAtMillis(millis);
     playNote2(millis);
-
+    
 }
 
-int ofxTLVMMNotes::playNote2(long millis){
+void ofxTLVMMNotes::playNote3(long millis){
     
-    //get out if no frames.
-    if(keyframes.size() == 0){
-        return 0;
-    }
+    
+}
+
+void ofxTLVMMNotes::playNote2(long millis){
     
     //calculate how long in ms is one beat at current tempo
     float oneBeatInMS = getNoteDuration(timeline->getBPM(), 1.0, false);
@@ -399,7 +399,6 @@ int ofxTLVMMNotes::playNote2(long millis){
         
         //get timing from VMMtimeline
         long thisTimelinePoint = millis;
-        
         
         //make sure it's on screen
         //if(isKeyframeIsInBounds(keyframes[i])){
@@ -416,59 +415,82 @@ int ofxTLVMMNotes::playNote2(long millis){
         float rMS = oneBeatInMS*note->ADSR[3];
         
         //ADSR components
-        //attack
         if(millis >= time && millis <= time+aMS){
-            cout << track << " NOTE[attack] " << note->pitch-60 << " - " << note->time << endl;
+            //attack
+            note->state = 1;
+        }else if (millis >= time+aMS && millis <= time+aMS+dMS) {
+            //decay
+            note->state = 2;
+        }else if(millis >= time+aMS+dMS && millis <= time+aMS+dMS+sMS) {
+            //sustain
+            note->state = 3;
+        }else if(millis >= time+aMS+dMS+sMS && millis <= time+aMS+dMS+sMS+rMS) {
+            //release
+            note->state = 4;
+        } else {
+            note->state = 0;
+        }
+        
+        float start = 0;
+        float end = 0;
+        int t1 = 0;
+        int t2 = 0;
+        
+        switch (note->state) {
+            case 1:
+                start = time;
+                end = time+aMS;
+                t1 = note->seg[0];
+                t2 = note->seg[1];
+                break;
+            
+            case 2:
+                start = time+aMS;
+                end = start+dMS;
+                t1 = note->seg[1];
+                t2 = note->seg[2];
+                break;
+            
+            case 3:
+                start = time+aMS+dMS;
+                end = start+sMS;
+                t1 = note->seg[2];
+                t2 = note->seg[2];
+                break;
+            
+            case 4:
+                start = time+aMS+dMS+sMS;
+                end = start+rMS;
+                t1 = note->seg[2];
+                t2 = note->seg[3]+1;
+                break;
+                
+            case 0:
+                start = 0;
+                end = 0;
+                note->frame = 0;
+                note->lastFrame = 0;
+                break;
+                
+            default:
+                break;
+        }
+        
+        if(note->state > 0){
 
-//            note->frame = ofxTween::map(millis, time, time+aMS, 0, 11, clamp, easeLinear, easingType);
-//            if(note->frame != note->lastFrame){
-//                cout << track << " NOTE[attack] " << note->pitch-60 << " - " << note->frame << endl;
-//                //sendOSC(note->pitch-60, note->frame);
-//                note->lastFrame = note->frame;
-//            }
-        }
-        
-        //decay
-        if(millis >= time+aMS && millis <= time+aMS+dMS) {
-            cout << track << " NOTE[decay] " << note->pitch-60 << " - " << note->time << endl;
+            note->frame = ofxTween::map(millis, start, end, t1, t2, clamp, easeLinear, easingType);
             
-//            note->frame = ofxTween::map(millis, time+aMS, time+aMS+dMS, 11, 16, clamp, easeLinear, easingType);
-//            if(note->frame != note->lastFrame){
-//                cout << track << " NOTE[decay] " << note->pitch-60 << " - " << note->frame << endl;
-//                //sendOSC(note->pitch-60, note->frame);
-//                note->lastFrame = note->frame;
-//            }
-            
-        }
-        
-        //sustain
-        if(millis >= time+aMS+dMS && millis <= time+aMS+dMS+sMS) {
-            cout << track << " NOTE[decay] " << note->pitch-60 << " - " << note->time << endl;
+            cout << track << " NOTE[" << note->state << "] " << note->pitch-60 << " SEG[" << note->seg[note->state-1] << "]" << note->frame << endl;
 
-//            note->frame = 16;
-//            if(note->frame != note->lastFrame){
-//                cout << track << " NOTE[sustain] " << note->pitch-60 << " - " << note->frame << endl;
-//                //sendOSC(note->pitch-60, note->frame);
-//                note->lastFrame = note->frame;
-//            }
         }
         
-        //release
-        if(millis >= time+aMS+dMS+sMS && millis <= time+aMS+dMS+sMS+rMS) {
-            cout << track << " NOTE[release] " << note->pitch-60 << " - " << note->time << endl;
-            
-            
-//            note->frame = ofxTween::map(millis, time+aMS+dMS+sMS, time+aMS+dMS+sMS+rMS, 17, 30, clamp, easeLinear, easingType);
-//            if(note->frame != note->lastFrame){
-//                cout << track << " NOTE[release] " << note->pitch-60 << " - " << note->frame << endl;
-//                //sendOSC(note->pitch-60, note->frame);
-//                note->lastFrame = note->frame;
-//            }
+        //work on this logic
+        if(note->frame > note->lastFrame){
+            //cout << track << " NOTE[" << note->state << "] " << note->pitch-60 << " - " << note->frame << endl;
+            //sendOSC(note->pitch-60, note->frame);
+            note->lastFrame = note->frame;
         }
         
-        return note->pitch;
-        
-        //}// end if
     }// end for
 }
 
