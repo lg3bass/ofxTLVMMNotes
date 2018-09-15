@@ -380,16 +380,11 @@ float ofxTLVMMNotes::getNoteDuration(float BPM, float value, bool normalized = f
 void ofxTLVMMNotes::playNote(float millis){
     //test
     //getNoteAtMillis(millis);
-    playNote2(millis);
+    //playTLVMMnotesTrack(millis);
     
 }
 
-void ofxTLVMMNotes::playNote3(long millis){
-    
-    
-}
-
-void ofxTLVMMNotes::playNote2(long millis){
+void ofxTLVMMNotes::playTLVMMnotesTrack(long millis){
     
     //calculate how long in ms is one beat at current tempo
     float oneBeatInMS = getNoteDuration(timeline->getBPM(), 1.0, false);
@@ -406,7 +401,6 @@ void ofxTLVMMNotes::playNote2(long millis){
         //so we can safely cast
         ofxTLVMMNote* note = (ofxTLVMMNote*)keyframes[i];
         float time = note->time;
-        //float time = keyframes[i]->time; //thought this might be the problem
         
         //calculate how long each ADSR component is in milliseconds.
         float aMS = oneBeatInMS*note->ADSR[0];
@@ -480,16 +474,16 @@ void ofxTLVMMNotes::playNote2(long millis){
 
             note->frame = ofxTween::map(millis, start, end, t1, t2, clamp, easeLinear, easingType);
             
-            cout << track << " NOTE[" << note->state << "] " << note->pitch-60 << " SEG[" << note->seg[note->state-1] << "]" << note->frame << endl;
-
+            //cout << track << " NOTE[" << note->state << "] " << note->pitch-60 << " SEG[" << note->seg[note->state-1] << "]" << note->frame << endl;
+            sendOSC(note->pitch-60, note->frame);
         }
         
         //work on this logic
-        if(note->frame > note->lastFrame){
-            //cout << track << " NOTE[" << note->state << "] " << note->pitch-60 << " - " << note->frame << endl;
-            //sendOSC(note->pitch-60, note->frame);
-            note->lastFrame = note->frame;
-        }
+//        if(note->frame > note->lastFrame){
+//            //cout << track << " NOTE[" << note->state << "] " << note->pitch-60 << " - " << note->frame << endl;
+//
+//            note->lastFrame = note->frame;
+//        }
         
     }// end for
 }

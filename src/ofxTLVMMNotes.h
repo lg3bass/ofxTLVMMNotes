@@ -138,8 +138,8 @@ public:
     float getNoteDuration(float BPM, float value, bool normalized);
     
     void playNote(float millis);
-    void playNote2(long millis);
-    void playNote3(long millis);
+    void playTLVMMnotesTrack(long millis);
+
     
     //events
     long lastTimelinePoint;
