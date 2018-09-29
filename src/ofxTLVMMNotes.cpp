@@ -84,7 +84,7 @@ ofxTLVMMNotes::ofxTLVMMNotes(){
     
     initializeNotes();
     
-    setRange(ofRange(60,72));
+    setRange(ofRange(60,71));
     drawingEasingWindow = false;
     
     //ofxTween test
@@ -107,7 +107,6 @@ void ofxTLVMMNotes::update(){
     sendNoteOnEvent();
 
 }
-
 
 void ofxTLVMMNotes::draw(){
     ofPopStyle();//need this for some reason.
@@ -135,7 +134,6 @@ void ofxTLVMMNotes::draw(){
             ofxTLVMMNote* note = (ofxTLVMMNote*)keyframes[i];
             ofVec2f screenPoint = screenPositionForKeyframe(note);
             
-            
             if(hoverKeyframe == note){
                 //hovering over a note.
                 ofSetColor(timeline->getColors().highlightColor, 100);
@@ -157,14 +155,11 @@ void ofxTLVMMNotes::draw(){
                 //just draw the note
                 ofSetColor(timeline->getColors().keyColor);
                 drawNote(screenPoint,note, false);
-                
             }
             
             //additionally draw red dot where the key is
             ofSetColor(ofColor::red);
             ofDrawCircle(screenPoint, 1);
-
-           
             
         }// end if isKeyframeIsInBounds
         
@@ -839,12 +834,13 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
     float s = oneBeatWidthOnTimeline*note->ADSR[2];
     float r = oneBeatWidthOnTimeline*note->ADSR[3];
     
+    /*
     //calculate how long each ADSR component is in milliseconds.
     float aMS = oneBeatInMS*note->ADSR[0];
     float dMS = oneBeatInMS*note->ADSR[1];
     float sMS = oneBeatInMS*note->ADSR[2];
     float rMS = oneBeatInMS*note->ADSR[3];
-    
+    */
     
     ofPushStyle();
         if(highlight){
@@ -896,6 +892,31 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         ofEndShape();
     ofPopStyle();
     
+    //draw the frame counter
+    switch (note->state) {
+        case 1:
+            ofSetColor(ofColor::lightYellow);
+            ofDrawBitmapString(note->frame, pos.x, pos.y + 20);
+            break;
+        case 2:
+            ofSetColor(ofColor::lightYellow);
+            ofDrawBitmapString(note->frame, pos.x+a, pos.y + 20);
+            break;
+        case 3:
+            ofSetColor(ofColor::lightYellow);
+            ofDrawBitmapString(note->frame, pos.x+a+d, pos.y + 20);
+            break;
+        case 4:
+            ofSetColor(ofColor::lightYellow);
+            ofDrawBitmapString(note->frame, pos.x+a+d+s, pos.y + 20);
+            break;
+        case 0:
+            
+            break;
+    }
+    
+
+/*
     //ADSR components
     //attack
     if(thisTimelinePoint >= time && thisTimelinePoint <= time+aMS){
@@ -905,11 +926,11 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         ofDrawBitmapString(note->frame, pos.x, pos.y + 20);
         
         
-        if(note->frame != note->lastFrame){
-            //cout << "outFrame(a): " << note->pitch-60 << " - " << note->frame << endl;
-            //sendOSC(note->pitch-60, note->frame);
-            note->lastFrame = note->frame;
-        }
+//        if(note->frame != note->lastFrame){
+//            //cout << "outFrame(a): " << note->pitch-60 << " - " << note->frame << endl;
+//            //sendOSC(note->pitch-60, note->frame);
+//            note->lastFrame = note->frame;
+//        }
     }
     
     //decay
@@ -919,11 +940,11 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         ofSetColor(ofColor::lightYellow);
         ofDrawBitmapString(note->frame, pos.x+a, pos.y + 20);
         
-        if(note->frame != note->lastFrame){
-            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
-            //sendOSC(note->pitch-60, note->frame);
-            note->lastFrame = note->frame;
-        }
+//        if(note->frame != note->lastFrame){
+//            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
+//            //sendOSC(note->pitch-60, note->frame);
+//            note->lastFrame = note->frame;
+//        }
 
     }
     
@@ -934,11 +955,11 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         ofSetColor(ofColor::lightYellow);
         ofDrawBitmapString(note->frame, pos.x+a+d, pos.y + 20);
 
-        if(note->frame != note->lastFrame){
-            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
-            //sendOSC(note->pitch-60, note->frame);
-            note->lastFrame = note->frame;
-        }
+//        if(note->frame != note->lastFrame){
+//            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
+//            //sendOSC(note->pitch-60, note->frame);
+//            note->lastFrame = note->frame;
+//        }
     }
     
     //release
@@ -948,13 +969,13 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
         ofSetColor(ofColor::lightYellow);
         ofDrawBitmapString(note->frame, pos.x+a+d+s, pos.y + 20);
 
-        if(note->frame != note->lastFrame){
-            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
-            //sendOSC(note->pitch-60, note->frame);
-            note->lastFrame = note->frame;
-        }
+//        if(note->frame != note->lastFrame){
+//            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
+//            //sendOSC(note->pitch-60, note->frame);
+//            note->lastFrame = note->frame;
+//        }
     }
-
+*/
 }
 
 void ofxTLVMMNotes::sendNoteOnEvent(){
