@@ -179,6 +179,11 @@ void ofxTLVMMNotes::draw(){
     
     ofPopStyle();
     
+    //test draw stuff
+    /*
+    ofSetColor(ofColor::red);
+    ofDrawRectangle(bounds.x-80, bounds.y+100, 50, 50);
+    */
 }
 
 void ofxTLVMMNotes::drawBackgroundGrid() {
