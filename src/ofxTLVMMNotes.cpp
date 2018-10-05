@@ -352,6 +352,8 @@ void ofxTLVMMNotes::sendOSC(int buffer, int val){
     
 }
 
+#pragma mark note functions
+// ------------------------------------------------------------------------------------
 int ofxTLVMMNotes::getNote() {
     return getNoteAtMillis(currentTrackTime());
     
@@ -375,6 +377,28 @@ float ofxTLVMMNotes::getNoteDuration(float BPM, float value, bool normalized = f
     return duration;
     
 }
+
+
+ofxTLVMMNote* ofxTLVMMNotes::getSelectedNoteKeyframe(){
+    
+    //ofxTLKeyframe* temp = selectedKeyframe;
+    
+    ofxTLVMMNote* temps  = (ofxTLVMMNote*)selectedKeyframe;
+    
+    return temps;
+    
+}
+
+
+void ofxTLVMMNotes::setFramesADSR(int f, int s){
+    //set the segments per note
+    cout << "setFrameADSR(" << f << "," << s << ")" << endl;
+    ofxTLVMMNote* temp = (ofxTLVMMNote*)selectedKeyframe;
+
+    temp->seg[s]=f;
+}
+
+
 
 //test function called from outside.
 void ofxTLVMMNotes::playNote(float millis){
@@ -1114,6 +1138,11 @@ void ofxTLVMMNotes::restoreKeyframe(ofxTLKeyframe* key, ofxXmlSettings& xmlStore
     note->ADSR[1] = xmlStore.getValue("decay", 0.0);
     note->ADSR[2] = xmlStore.getValue("sustain", 0.0);
     note->ADSR[3] = xmlStore.getValue("release", 0.0);
+    note->seg[0] = xmlStore.getValue("aFrame",0.0);
+    note->seg[1] = xmlStore.getValue("dFrame",0.0);
+    note->seg[2] = xmlStore.getValue("sFrame",0.0);
+    note->seg[3] = xmlStore.getValue("rFrame",0.0);
+    
     note->notePlaying = false;
     quantizeNoteByPos(note);//kinda works. too many calls to write files.
 }
@@ -1128,6 +1157,11 @@ void ofxTLVMMNotes::storeKeyframe(ofxTLKeyframe* key, ofxXmlSettings& xmlStore){
     xmlStore.addValue("decay", note->ADSR[1]);
     xmlStore.addValue("sustain", note->ADSR[2]);
     xmlStore.addValue("release", note->ADSR[3]);
+    xmlStore.addValue("aFrame", note->seg[0]);
+    xmlStore.addValue("dFrame", note->seg[1]);
+    xmlStore.addValue("sFrame", note->seg[2]);
+    xmlStore.addValue("rFrame", note->seg[3]);
+    
     
 }
 

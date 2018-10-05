@@ -137,6 +137,10 @@ public:
     int getNoteAtPercent(float percent);
     float getNoteDuration(float BPM, float value, bool normalized);
     
+    void setFramesADSR(int f, int s);
+    
+    ofxTLVMMNote* getSelectedNoteKeyframe();
+    
     void playNote(float millis);
     void playTLVMMnotesTrack(long millis);
 
