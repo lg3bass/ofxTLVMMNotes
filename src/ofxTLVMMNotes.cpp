@@ -381,12 +381,9 @@ float ofxTLVMMNotes::getNoteDuration(float BPM, float value, bool normalized = f
 
 ofxTLVMMNote* ofxTLVMMNotes::getSelectedNoteKeyframe(){
     
-    //ofxTLKeyframe* temp = selectedKeyframe;
-    
     ofxTLVMMNote* temps  = (ofxTLVMMNote*)selectedKeyframe;
     
     return temps;
-    
 }
 
 
@@ -398,7 +395,27 @@ void ofxTLVMMNotes::setFramesADSR(int f, int s){
     temp->seg[s]=f;
 }
 
+ofVec4f ofxTLVMMNotes::getFrameADSR(){
+    
+    ofVec4f passback = ofVec4f(0,0,0,0);
+    
+    if(selectedKeyframes.size() > 0){
+        
+        
+        ofxTLVMMNote* temp = (ofxTLVMMNote*)selectedKeyframe;
+        
+        if(temp){
+            passback[0] = temp->seg[0];
+            passback[1] = temp->seg[1];
+            passback[2] = temp->seg[2];
+            passback[3] = temp->seg[3];
+        }
+        
 
+        
+    }
+    return passback;
+}
 
 //test function called from outside.
 void ofxTLVMMNotes::playNote(float millis){
@@ -756,20 +773,21 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
         cout << "ofxTLVMMNotes::mouseReleased - END MODAL" << endl;
     } else {
         
-        //standard mouseReleased
-        ofxTLKeyframes::mouseReleased(args, millis);
         
-        //snap the notes on the grid.
+        if(createNewOnMouseup){
+            cout << "CREATE NOTE" << endl;
+            //standard mouseReleased
+            ofxTLKeyframes::mouseReleased(args, millis);
+        }
+
         for(int k = 0; k < selectedKeyframes.size(); k++) {
             ofxTLVMMNote* note = (ofxTLVMMNote*)selectedKeyframes[k];
             
             quantizeNoteByPos(note);
+            cout << "ofxTLVMMNotes::mouseReleased - SELECT NOTE" << "[" << note->pitch << ":" << note->value << "]" << endl;
             
-            cout << "ofxTLVMMNotes::mouseReleased - CREATE NOTE" << "[" << note->pitch << ":" << note->value << "]" << endl;
             
         }
-        
-        
     }
 }
 
