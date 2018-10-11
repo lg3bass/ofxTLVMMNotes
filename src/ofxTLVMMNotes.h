@@ -113,9 +113,12 @@ public:
     ofxTLVMMNotes();
     virtual ~ofxTLVMMNotes();
     
+    static ofEvent<ofVec4f> noteUIdata;
+    
     int track;  //store the current track
     int page;   //current page
     int clip;   //current clip
+    int keysCurrentlySelected; //number of selected keyframes
     
     virtual void update();
     virtual void draw();
@@ -154,6 +157,11 @@ public:
     
     ofxTextInputField textField;
     ofRectangle display;
+    
+    ofxTextInputField attackField;
+    ofxTextInputField decayField;
+    ofxTextInputField sustainField;
+    ofxTextInputField releaseField;
     
     //time range contains MIN and MAX time in milliseconds
     //valueRange is 0 at the bottom of the track, and 1 at the top

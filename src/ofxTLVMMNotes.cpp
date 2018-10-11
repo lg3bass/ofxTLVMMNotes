@@ -80,7 +80,12 @@ string ofxTLVMMNote::getPitchDisplay() {
 
 //--------------------------------------------------------------------------------------------
 //ofxTLVMMNotes
+
+ofEvent<ofVec4f> ofxTLVMMNotes::noteUIdata = ofEvent<ofVec4f>();
+
 ofxTLVMMNotes::ofxTLVMMNotes(){
+    
+    keysCurrentlySelected = 0;
     
     initializeNotes();
     
@@ -103,9 +108,8 @@ ofxTLVMMNotes::~ofxTLVMMNotes(){
 
 void ofxTLVMMNotes::update(){
     
-    //this needs to be done from update otherwise we get double triggers
+    //on update every frame check if a note is playing at the current time.  send event if note is within range.
     sendNoteOnEvent();
-
 }
 
 void ofxTLVMMNotes::draw(){
@@ -166,7 +170,7 @@ void ofxTLVMMNotes::draw(){
     }// end for
     
         //Text field on the top left showing the note range.
-        display = ofRectangle(bounds.x , bounds.y , 50, 20);
+        display = ofRectangle(bounds.x , bounds.y-30 , 50, 20);
     
         textField.bounds.x = display.x;
         textField.bounds.y = display.y;
@@ -177,13 +181,11 @@ void ofxTLVMMNotes::draw(){
         ofSetColor(255);
         textField.draw();
     
-    ofPopStyle();
+        ofDrawBitmapString("selectedKeyframes: "+ofToString(selectedKeyframes.size()), bounds.x+100, bounds.y-30);
+        ofDrawBitmapString("keysCurrentlySelected: "+ofToString(keysCurrentlySelected), bounds.x+100, bounds.y-15);
+        
     
-    //test draw stuff
-    /*
-    ofSetColor(ofColor::red);
-    ofDrawRectangle(bounds.x-80, bounds.y+100, 50, 50);
-    */
+    ofPopStyle();
 }
 
 void ofxTLVMMNotes::drawBackgroundGrid() {
@@ -349,6 +351,7 @@ void ofxTLVMMNotes::sendOSC(int buffer, int val){
     static NoteOscMessageEvent vmmOscEvent;
     vmmOscEvent.composeIntOscMsg(track+1, "vmmNotes", buffer, val);
     ofNotifyEvent(NoteOscMessageEvent::events, vmmOscEvent);
+
     
 }
 
@@ -389,10 +392,16 @@ ofxTLVMMNote* ofxTLVMMNotes::getSelectedNoteKeyframe(){
 
 void ofxTLVMMNotes::setFramesADSR(int f, int s){
     //set the segments per note
-    cout << "setFrameADSR(" << f << "," << s << ")" << endl;
-    ofxTLVMMNote* temp = (ofxTLVMMNote*)selectedKeyframe;
-
-    temp->seg[s]=f;
+    cout << "setFrameADSR(" << f << "," << s << ") getSelectedItemCount: " << getSelectedItemCount() << endl;
+    
+    if(selectedKeyframe != NULL){
+        ofxTLVMMNote* temp = (ofxTLVMMNote*)selectedKeyframe;
+        temp->seg[s]=f;
+        
+    } else {
+        cout << "only one keyframe at a time" << endl;
+    }
+    
 }
 
 ofVec4f ofxTLVMMNotes::getFrameADSR(){
@@ -686,6 +695,13 @@ bool enteringText = false;
 #pragma mark mouse interactions
 
 bool ofxTLVMMNotes::mousePressed(ofMouseEventArgs& args, long millis){
+    //cout << "ofxTLVMMNotes::mousePressed " << isKeyframeSelected(selectedKeyframe) << endl;
+    
+  
+    
+    if(isKeyframeSelected(selectedKeyframe)){
+        //cout << "ofxTLVMMNotes::mousePressed - SELECT NOTE >>>>>>>>" << endl;
+    }
     
     if(drawingEasingWindow){
         return true;
@@ -695,14 +711,18 @@ bool ofxTLVMMNotes::mousePressed(ofMouseEventArgs& args, long millis){
         //become selectd
         
         if (display.inside(args.x, args.y)) {
+            
+            
             if (textField.isEditing()) {
                 textField.endEditing();
                 enteringText = false;
                 timeline->dismissedModalContent();
+                
             } else {
                 textField.beginEditing();
                 enteringText = true;
                 timeline->presentedModalContent(this);
+
             }
             return false;
         } else {
@@ -711,10 +731,9 @@ bool ofxTLVMMNotes::mousePressed(ofMouseEventArgs& args, long millis){
         
         //if we get all the way here we didn't click on a text field and we aren't
         //currently entering text so proceed as normal
-        
-        
+         
     }
-    
+
 }
 
 void ofxTLVMMNotes::mouseMoved(ofMouseEventArgs& args, long millis){
@@ -772,10 +791,8 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
         
         cout << "ofxTLVMMNotes::mouseReleased - END MODAL" << endl;
     } else {
-        
-        
         if(createNewOnMouseup){
-            cout << "CREATE NOTE" << endl;
+            cout << "ofxTLVMMNotes::mouseReleased - CREATE NOTE" << endl;
             //standard mouseReleased
             ofxTLKeyframes::mouseReleased(args, millis);
         }
@@ -784,11 +801,16 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
             ofxTLVMMNote* note = (ofxTLVMMNote*)selectedKeyframes[k];
             
             quantizeNoteByPos(note);
-            cout << "ofxTLVMMNotes::mouseReleased - SELECT NOTE" << "[" << note->pitch << ":" << note->value << "]" << endl;
+            cout    << "ofxTLVMMNotes::mouseReleased - SELECT NOTE" << "[" << note->pitch << ":" << note->value << "] - ADSR["
+            << note->seg[0] << "," << note->seg[1] << "," << note->seg[2] << "," << note->seg[3] << "]" << endl;
             
+            //send a event to update the note data.
+            ofVec4f pass = ofVec4f(note->seg[0], note->seg[1], note->seg[2], note->seg[3]);
             
+            ofNotifyEvent(noteUIdata, pass);
         }
     }
+    keysCurrentlySelected = selectedKeyframes.size();
 }
 
 #pragma mark note functions
@@ -848,8 +870,21 @@ void ofxTLVMMNotes::keyPressed(ofKeyEventArgs& args){
 }
 
 void ofxTLVMMNotes::regionSelected(ofLongRange timeRange, ofRange valueRange){
+    
+    cout << "ofxTLVMMNotes::regionSelected" << endl;
     //you can override the default to select other things than just dots
-    ofxTLKeyframes::regionSelected(timeRange, valueRange);
+    //ofxTLKeyframes::regionSelected(timeRange, valueRange);
+    
+    for(int i = 0; i < keyframes.size(); i++){
+        if(timeRange.contains(keyframes[i]->time) && valueRange.contains(1.-keyframes[i]->value)){
+            selectKeyframe(keyframes[i]);
+        }
+    }
+    updateKeyframeSort();
+    
+    
+    keysCurrentlySelected = selectedKeyframes.size();
+    
 }
 
 
@@ -861,8 +896,6 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
     //float t = keyframes[i]->time;
     float time = note->time;
     float oneBeatInMS = getNoteDuration(timeline->getBPM(), 1.0, false);
-    
-
     
     //double oneBeat = 1.0/(timeline->getBPM()/60.0);
     double oneBeat = getNoteDuration(timeline->getBPM(), 1.0, true);//60 is fps
@@ -961,73 +994,14 @@ void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
             
             break;
     }
-    
-
-/*
-    //ADSR components
-    //attack
-    if(thisTimelinePoint >= time && thisTimelinePoint <= time+aMS){
-        note->frame = ofxTween::map(thisTimelinePoint, time, time+aMS, 0, 11, clamp, easeLinear, easingType);
-        
-        ofSetColor(ofColor::lightYellow);
-        ofDrawBitmapString(note->frame, pos.x, pos.y + 20);
-        
-        
-//        if(note->frame != note->lastFrame){
-//            //cout << "outFrame(a): " << note->pitch-60 << " - " << note->frame << endl;
-//            //sendOSC(note->pitch-60, note->frame);
-//            note->lastFrame = note->frame;
-//        }
-    }
-    
-    //decay
-    if(thisTimelinePoint >= time+aMS && thisTimelinePoint <= time+aMS+dMS) {
-        note->frame = ofxTween::map(thisTimelinePoint, time+aMS, time+aMS+dMS, 11, 16, clamp, easeLinear, easingType);
-
-        ofSetColor(ofColor::lightYellow);
-        ofDrawBitmapString(note->frame, pos.x+a, pos.y + 20);
-        
-//        if(note->frame != note->lastFrame){
-//            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
-//            //sendOSC(note->pitch-60, note->frame);
-//            note->lastFrame = note->frame;
-//        }
-
-    }
-    
-    //sustain
-    if(thisTimelinePoint >= time+aMS+dMS && thisTimelinePoint <= time+aMS+dMS+sMS) {
-        note->frame = 16;
-        
-        ofSetColor(ofColor::lightYellow);
-        ofDrawBitmapString(note->frame, pos.x+a+d, pos.y + 20);
-
-//        if(note->frame != note->lastFrame){
-//            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
-//            //sendOSC(note->pitch-60, note->frame);
-//            note->lastFrame = note->frame;
-//        }
-    }
-    
-    //release
-    if(thisTimelinePoint >= time+aMS+dMS+sMS && thisTimelinePoint <= time+aMS+dMS+sMS+rMS) {
-        note->frame = ofxTween::map(thisTimelinePoint, time+aMS+dMS+sMS, time+aMS+dMS+sMS+rMS, 17, 30, clamp, easeLinear, easingType);
-        
-        ofSetColor(ofColor::lightYellow);
-        ofDrawBitmapString(note->frame, pos.x+a+d+s, pos.y + 20);
-
-//        if(note->frame != note->lastFrame){
-//            //cout << "outFrame(d): " << note->pitch-60 << " - " << note->frame << endl;
-//            //sendOSC(note->pitch-60, note->frame);
-//            note->lastFrame = note->frame;
-//        }
-    }
-*/
 }
 
 void ofxTLVMMNotes::sendNoteOnEvent(){
+    //convert the current time to a long
     long thisTimelinePoint = currentTrackTime();
+    //loop through keys
     for(int i = 0; i < keyframes.size(); i++){
+        //
         if(timeline->getInOutRangeMillis().contains(keyframes[i]->time) &&
            lastTimelinePoint <= keyframes[i]->time &&
            thisTimelinePoint >= keyframes[i]->time &&
@@ -1035,14 +1009,13 @@ void ofxTLVMMNotes::sendNoteOnEvent(){
         {
             //ofLogNotice()   << "Accuracy of keyframes[" << i << "]->time(miliseconds) [" << keyframes[i]->time << "|" << thisTimelinePoint << "]";
             
-            //FIRE BANG
+            //create an envent to send
             bangFired(keyframes[i]);
             lastBangTime = ofGetElapsedTimef();
             
         }
     }
     lastTimelinePoint = thisTimelinePoint;
-
 }
 
 //-------------------------------------------------------
