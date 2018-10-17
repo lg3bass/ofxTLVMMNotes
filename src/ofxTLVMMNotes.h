@@ -118,7 +118,7 @@ public:
     int track;  //store the current track
     int page;   //current page
     int clip;   //current clip
-    int keysCurrentlySelected; //number of selected keyframes
+    vector<int> keyIndices; //store indices of selected keys. used for mass editing.
     
     virtual void update();
     virtual void draw();
@@ -203,6 +203,8 @@ protected:
     void quantizeNoteByPitch(ofxTLVMMNote* note);
     float rowNormHeight;
     
+    void addToKeyIndices(int i);
+    
     //void drawNote(ofVec2f pos, float length, bool highlight);
     void drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight);
 
@@ -235,5 +237,9 @@ protected:
     //you can responde to a keyframe about to be killed with this function right before the parent class deletes it
     virtual void willDeleteKeyframe(ofxTLKeyframe* keyframe);
     
-    //
+    //identify the index of the selectedKeyframe
+    int getSelectedKeyframeIndex(ofxTLKeyframe* keyframe);
+    
+    //itterate to get the index of the selectedKeyframe
+    int itterateToGetSelectedKeyframeIndex(ofxTLKeyframe* keyframe);
 };

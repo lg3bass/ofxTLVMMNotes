@@ -85,7 +85,6 @@ ofEvent<ofVec4f> ofxTLVMMNotes::noteUIdata = ofEvent<ofVec4f>();
 
 ofxTLVMMNotes::ofxTLVMMNotes(){
     
-    keysCurrentlySelected = 0;
     
     initializeNotes();
     
@@ -182,7 +181,7 @@ void ofxTLVMMNotes::draw(){
         textField.draw();
     
         ofDrawBitmapString("selectedKeyframes: "+ofToString(selectedKeyframes.size()), bounds.x+100, bounds.y-30);
-        ofDrawBitmapString("keysCurrentlySelected: "+ofToString(keysCurrentlySelected), bounds.x+100, bounds.y-15);
+        ofDrawBitmapString("keyIndices<int>: "+ofToString(keyIndices), bounds.x+100, bounds.y-15);
         
     
     ofPopStyle();
@@ -259,7 +258,6 @@ void ofxTLVMMNotes::drawModalContent(){
     
     cout << ".";
     
-
     for(int i = 0; i < keyframes.size(); i++){
         //make sure it's on screen
         if(isKeyframeIsInBounds(keyframes[i])){
@@ -268,22 +266,19 @@ void ofxTLVMMNotes::drawModalContent(){
             
             ofNoFill();
             
+            /*
             //draw circle (testing)
             if(hoverKeyframe == note){
                 //cout << "draw modal at: " << ofToString(floor(screenPoint.x)) << ":" << ofToString(floor(screenPoint.y)) << endl;
                 
                 ofSetColor(timeline->getColors().textColor);
                 ofDrawCircle(screenPoint, 20);
-
-            }
-            else if(isKeyframeSelected(note)){
+            } else if(isKeyframeSelected(note)){
                 
                 ofSetColor(timeline->getColors().textColor);
                 ofDrawCircle(screenPoint, 30);
-                
-
-
             }
+            */
             
             if(isKeyframeSelected(note)){
                 for(int i = 0; i < noteDurations.size(); i++){
@@ -301,38 +296,9 @@ void ofxTLVMMNotes::drawModalContent(){
                                     noteDurations[i]->bounds.width, noteDurations[i]->bounds.height);
                     
                 }
-                /*
-                //test drawing a second modal
-                // -------------------------------------------
-                for(int i = 0; i < noteDurations.size(); i++){
-                    
-                    ofFill();
-                    //draw black box around all the note durations.
-                    ofDrawRectangle(screenPoint.x + noteDurations[i]->bounds.x + noteDurations[i]->bounds.width,
-                                    screenPoint.y + noteDurations[i]->bounds.y,
-                                    noteDurations[i]->bounds.width, noteDurations[i]->bounds.height);
-                    ofSetColor(200, 200, 200);
-                    timeline->getFont().drawString(noteDurations[i]->name,screenPoint.x + noteDurations[i]->bounds.width + noteDurations[i]->bounds.x+11,screenPoint.y + noteDurations[i]->bounds.y+10);
-                    ofNoFill();
-                    ofSetColor(40, 40, 40);
-                    ofDrawRectangle(screenPoint.x + noteDurations[i]->bounds.x + noteDurations[i]->bounds.width,
-                                    screenPoint.y + noteDurations[i]->bounds.y,
-                                    noteDurations[i]->bounds.width, noteDurations[i]->bounds.height);
-                    
-                }
-                // -------------------------------------------
-                */
             }
-            
-            
-            
         }
     }
-    
-    
-
-    
-    
 }
 
 void ofxTLVMMNotes::sendOSC(int buffer, int val){
@@ -394,6 +360,7 @@ void ofxTLVMMNotes::setFramesADSR(int f, int s){
     //set the segments per note
     cout << "setFrameADSR(" << f << "," << s << ") getSelectedItemCount: " << getSelectedItemCount() << endl;
     
+    /*
     if(selectedKeyframe != NULL){
         ofxTLVMMNote* temp = (ofxTLVMMNote*)selectedKeyframe;
         temp->seg[s]=f;
@@ -401,7 +368,20 @@ void ofxTLVMMNotes::setFramesADSR(int f, int s){
     } else {
         cout << "only one keyframe at a time" << endl;
     }
+    */
     
+    //try using an itterator instead.
+    if(keyIndices.size() > 0){
+        for(int i=0; i<keyIndices.size();i++){
+            cout << "setting keyframe: " << keyIndices[i] << endl;
+            ofxTLVMMNote* temp = (ofxTLVMMNote*)keyframes[keyIndices[i]];
+            temp->seg[s]=f;
+            
+        }
+    }
+    
+     
+     
 }
 
 ofVec4f ofxTLVMMNotes::getFrameADSR(){
@@ -695,12 +675,10 @@ bool enteringText = false;
 #pragma mark mouse interactions
 
 bool ofxTLVMMNotes::mousePressed(ofMouseEventArgs& args, long millis){
-    //cout << "ofxTLVMMNotes::mousePressed " << isKeyframeSelected(selectedKeyframe) << endl;
-    
-  
-    
-    if(isKeyframeSelected(selectedKeyframe)){
-        //cout << "ofxTLVMMNotes::mousePressed - SELECT NOTE >>>>>>>>" << endl;
+
+    //clear list of selected keys if not draggin marquee
+    if(!ofGetModifierShiftPressed()){
+        keyIndices.clear();
     }
     
     if(drawingEasingWindow){
@@ -709,10 +687,10 @@ bool ofxTLVMMNotes::mousePressed(ofMouseEventArgs& args, long millis){
         //for the general behavior call the super class
         //or you can do your own thing. Return true if the click caused an item to
         //become selectd
+
         
+        //if clicking inside the range text field.
         if (display.inside(args.x, args.y)) {
-            
-            
             if (textField.isEditing()) {
                 textField.endEditing();
                 enteringText = false;
@@ -726,14 +704,13 @@ bool ofxTLVMMNotes::mousePressed(ofMouseEventArgs& args, long millis){
             }
             return false;
         } else {
+            
             return ofxTLKeyframes::mousePressed(args, millis);
         }
         
         //if we get all the way here we didn't click on a text field and we aren't
         //currently entering text so proceed as normal
-         
     }
-
 }
 
 void ofxTLVMMNotes::mouseMoved(ofMouseEventArgs& args, long millis){
@@ -796,21 +773,27 @@ void ofxTLVMMNotes::mouseReleased(ofMouseEventArgs& args, long millis){
             //standard mouseReleased
             ofxTLKeyframes::mouseReleased(args, millis);
         }
-
-        for(int k = 0; k < selectedKeyframes.size(); k++) {
-            ofxTLVMMNote* note = (ofxTLVMMNote*)selectedKeyframes[k];
+        
+        //selectedKeyframes
+        for(int k = 0; k < keyframes.size(); k++) {
             
-            quantizeNoteByPos(note);
-            cout    << "ofxTLVMMNotes::mouseReleased - SELECT NOTE" << "[" << note->pitch << ":" << note->value << "] - ADSR["
-            << note->seg[0] << "," << note->seg[1] << "," << note->seg[2] << "," << note->seg[3] << "]" << endl;
+            //getSelectedKeyframeIndex(keyframes[k]);
             
-            //send a event to update the note data.
-            ofVec4f pass = ofVec4f(note->seg[0], note->seg[1], note->seg[2], note->seg[3]);
-            
-            ofNotifyEvent(noteUIdata, pass);
+            if(isKeyframeSelected(keyframes[k])){
+                cout << "keyframe[" << k << "]" << endl;
+                ofxTLVMMNote* note = (ofxTLVMMNote*)keyframes[k];
+                quantizeNoteByPos(note);
+                
+                //add to keyIndices
+                addToKeyIndices(k);
+                
+                //TEST - display note ADSR frames in leftPanel.
+                ofVec4f pass = ofVec4f(note->seg[0], note->seg[1], note->seg[2], note->seg[3]);
+                ofNotifyEvent(noteUIdata, pass);
+                
+            }
         }
     }
-    keysCurrentlySelected = selectedKeyframes.size();
 }
 
 #pragma mark note functions
@@ -878,15 +861,26 @@ void ofxTLVMMNotes::regionSelected(ofLongRange timeRange, ofRange valueRange){
     for(int i = 0; i < keyframes.size(); i++){
         if(timeRange.contains(keyframes[i]->time) && valueRange.contains(1.-keyframes[i]->value)){
             selectKeyframe(keyframes[i]);
+            
+            //add to keyIndices vec
+            addToKeyIndices(i);
+            
         }
     }
     updateKeyframeSort();
     
     
-    keysCurrentlySelected = selectedKeyframes.size();
     
 }
 
+void ofxTLVMMNotes::addToKeyIndices(int i){
+    //add to keyIndices vec
+    if(find(keyIndices.begin(), keyIndices.end(), i) != keyIndices.end()){
+        cout << "already in there" << endl;
+    } else {
+        keyIndices.push_back(i);
+    }
+}
 
 
 void ofxTLVMMNotes::drawNote(ofVec2f pos, ofxTLVMMNote* note, bool highlight){
@@ -1185,4 +1179,17 @@ void ofxTLVMMNotes::willDeleteKeyframe(ofxTLKeyframe* keyframe){
 }
 
 
+int ofxTLVMMNotes::getSelectedKeyframeIndex(ofxTLKeyframe* keyframe){
+   
+    for(int i = 0; i<keyframes.size();i++){
+        if((keyframe->value == keyframes[i]->value) && (keyframe->time == keyframes[i]->time)){
+            return i;
+        }
+    }
+    
+}
 
+int ofxTLVMMNotes::itterateToGetSelectedKeyframeIndex(ofxTLKeyframe* keyframe){
+    
+    
+}
